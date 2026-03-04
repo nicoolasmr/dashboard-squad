@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal, TrendingUp, X, LayoutGrid, List, Loader2 } from "lucide-react";
+import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal, TrendingUp, X, LayoutGrid, List, Loader2, Target } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useGoals, progressColor } from "@/hooks/useGoals";
 import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,8 @@ import { toast } from "sonner";
 export function FinanceView() {
     const [activeSubTab, setActiveSubTab] = useState<'DESPESA' | 'CUSTO'>('DESPESA');
     const { data: allData, loading, create } = useTransactions();
+    const currentMes = new Date().toISOString().slice(0, 7);
+    const { goal } = useGoals(currentMes);
     const [isNewRecordOpen, setIsNewRecordOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<Transaction | null>(null);
     const [search, setSearch] = useState("");
@@ -153,20 +156,49 @@ export function FinanceView() {
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-3 duration-700">
             {/* Header section */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Custos & Despesas</h1>
-                    <p className="text-muted-foreground mt-2 text-sm font-medium">Controle total do fluxo de saída e saúde financeira.</p>
+                    <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-br from-foreground via-foreground to-foreground/50 bg-clip-text text-transparent italic">Fluxo Financeiro</h1>
+                    <p className="text-muted-foreground mt-2 text-base font-medium uppercase tracking-tighter">Gerenciamento de desembolsos e provisões</p>
                 </div>
-                <Button
-                    onClick={() => setIsNewRecordOpen(true)}
-                    variant="destructive"
-                    className="h-12 px-8 rounded-2xl font-bold text-base shadow-xl shadow-error/20 hover:shadow-error/30 transition-all hover:-translate-y-0.5 active:scale-95"
-                >
-                    <Plus size={20} className="mr-2" />
-                    Novo Lançamento
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button onClick={() => setIsNewRecordOpen(true)} className="rounded-xl px-6 h-12 bg-primary font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform gap-2 border-none">
+                        <Plus size={20} />
+                        Registrar {activeSubTab === 'DESPESA' ? 'Despesa' : 'Custo'}
+                    </Button>
+                </div>
             </div>
+
+            {/* Meta Progress Bar (Costs) */}
+            {goal && activeSubTab === 'CUSTO' && (goal.meta_lucro ?? 0) > 0 && (() => {
+                const custoReal = allData.filter(t => t.tipo === 'CUSTO' && t.status === 'PAGO').reduce((s, t) => s + t.valor, 0);
+                const metaCusto = (goal.meta_receita ?? 0) - (goal.meta_lucro ?? 0); // Simplified operational cost ceiling
+                if (metaCusto <= 0) return null;
+                const pct = Math.min(100, (custoReal / metaCusto) * 100);
+                // Inverse color logic for costs: green is low, red is high
+                const color = pct > 90 ? "var(--destructive)" : pct > 70 ? "var(--warning)" : "var(--success)";
+
+                return (
+                    <div className="bg-card/50 backdrop-blur-sm rounded-[1.5rem] border border-border/40 p-5 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm font-bold">
+                                <Target size={16} className="text-primary" />
+                                <span>Teto de Custos Operacionais — {new Date().toLocaleDateString('pt-BR', { month: 'long' })}</span>
+                            </div>
+                            <div className="text-sm font-black" style={{ color }}>
+                                {custoReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {metaCusto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                <span className="ml-2 opacity-70">({pct.toFixed(0)}%)</span>
+                            </div>
+                        </div>
+                        <div className="h-3 bg-muted/50 rounded-full overflow-hidden">
+                            <div
+                                className="h-full rounded-full transition-all duration-700"
+                                style={{ width: `${pct}%`, backgroundColor: color }}
+                            />
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -9,8 +9,8 @@ import {
     AlertCircle,
     PieChart as PieChartIcon,
     BarChart3,
-    ArrowRight,
-    Zap
+    Zap,
+    ArrowUp
 } from "lucide-react";
 import { KPICard } from "@/components/ui/kpi-card";
 import { DashboardData, Transaction } from "@/types/dashboard";
@@ -42,16 +42,35 @@ interface DashboardViewProps {
 
 const COLORS = ["#0066ff", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
-// Mock data for line chart (will remain mock for now but looking premium)
-const REVENUE_DATA = [
-    { name: "20/02", receita: 4000, despesas: 2400 },
-    { name: "21/02", receita: 3000, despesas: 1398 },
-    { name: "22/02", receita: 2000, despesas: 9800 },
-    { name: "23/02", receita: 2780, despesas: 3908 },
-    { name: "24/02", receita: 1890, despesas: 4800 },
-    { name: "25/02", receita: 2390, despesas: 3800 },
-    { name: "26/02", receita: 3490, despesas: 4300 },
-];
+
+// Generate dynamic labels and values for the last 14 days
+function getChartData(transactions: Transaction[]) {
+    const dataMap: Record<string, { receita: number; despesas: number }> = {};
+    const now = new Date();
+
+    for (let i = 13; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        dataMap[label] = { receita: 0, despesas: 0 };
+    }
+
+    transactions.forEach(t => {
+        const dateStr = new Date(t.data).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        if (dataMap[dateStr]) {
+            if (t.tipo === 'RECEITA' && t.status === 'APROVADO') {
+                dataMap[dateStr].receita += t.valor;
+            } else if (t.tipo === 'DESPESA' || t.tipo === 'CUSTO') {
+                dataMap[dateStr].despesas += t.valor;
+            }
+        }
+    });
+
+    return Object.entries(dataMap).map(([name, vals]) => ({
+        name,
+        ...vals
+    }));
+}
 
 export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, onViewMeetings }: DashboardViewProps) {
     const kpis = data?.kpis;
@@ -79,9 +98,14 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
 
     const recentSales = transactions
         .filter(t => t.tipo === 'RECEITA')
+        .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
         .slice(0, 4);
 
-    const todayMeetings = meetings.slice(0, 3);
+    const todayMeetings = meetings
+        .sort((a, b) => new Date(a.data_hora).getTime() - new Date(b.data_hora).getTime())
+        .slice(0, 3);
+
+    const chartData = getChartData(transactions);
 
     return (
         <div className="flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -158,7 +182,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     <CardContent className="p-8 pt-0">
                         <div className="h-[350px] w-full mt-6">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={REVENUE_DATA}>
+                                <AreaChart data={chartData}>
                                     <defs>
                                         <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#0066ff" stopOpacity={0.15} />
@@ -255,10 +279,10 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                         </div>
                         <Button
                             variant="ghost"
-                            className="rounded-xl font-bold gap-2 text-primary hover:bg-primary/5"
+                            className="rounded-xl font-bold gap-2 text-primary hover:bg-primary/5 h-8 px-3"
                             onClick={onViewSales}
                         >
-                            Ver Todas <ArrowRight size={14} />
+                            Ver Todas <ArrowUp size={14} className="rotate-45" />
                         </Button>
                     </CardHeader>
                     <CardContent className="p-8 pt-2 space-y-4">
@@ -294,10 +318,10 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                         </div>
                         <Button
                             variant="ghost"
-                            className="rounded-xl font-bold gap-2 text-success hover:bg-success/5"
+                            className="rounded-xl font-bold gap-2 text-success hover:bg-success/5 h-8 px-3"
                             onClick={onViewMeetings}
                         >
-                            Acessar Agenda <ArrowRight size={14} />
+                            Ver Agenda <ArrowUp size={14} className="rotate-45" />
                         </Button>
                     </CardHeader>
                     <CardContent className="p-8 pt-2 space-y-4">
