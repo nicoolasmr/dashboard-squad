@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/Toast";
 import { N8nService } from "@/lib/api/n8n";
 import { DashboardData } from "@/types/dashboard";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 // Sub-components
 import { DashboardView } from "@/components/dashboard/DashboardView";
@@ -17,7 +18,7 @@ import { ImportView } from "@/components/import/ImportTool";
 import { ModoTV } from "@/components/tv/ModoTV";
 import { ConnectionSettings } from "@/components/layout/ConnectionSettings";
 
-export default function Home() {
+function DashboardContent() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
@@ -71,23 +72,23 @@ export default function Home() {
   const handleNewExpense = () => setActiveTab("finance");
   const handleNewMeeting = () => setActiveTab("meetings");
 
+  if (isTVMode) {
+    return <ModoTV data={data} loading={loading} lastSync={lastSync} />;
+  }
+
   return (
     <main className="min-h-screen pt-16 lg:pl-64">
-      {!isTVMode && (
-        <>
-          <Navbar
-            activeTab={activeTab}
-            onRefresh={fetchData}
-            onNewSale={handleNewSale}
-            onNewExpense={handleNewExpense}
-            onNewMeeting={handleNewMeeting}
-            onSettings={() => setIsSettingsOpen(true)}
-          />
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        </>
-      )}
+      <Navbar
+        activeTab={activeTab}
+        onRefresh={fetchData}
+        onNewSale={handleNewSale}
+        onNewExpense={handleNewExpense}
+        onNewMeeting={handleNewMeeting}
+        onSettings={() => setIsSettingsOpen(true)}
+      />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className={isTVMode ? "p-0" : "p-6 lg:p-10"}>
+      <div className="p-6 lg:p-10">
         {activeTab === "dashboard" && <DashboardView data={data} loading={loading} isTVMode={isTVMode} lastSync={lastSync} />}
         {activeTab === "sales" && <SalesView />}
         {activeTab === "finance" && <FinanceView />}
@@ -100,5 +101,13 @@ export default function Home() {
         onClose={() => setIsSettingsOpen(false)}
       />
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Carregando Dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
