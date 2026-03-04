@@ -90,7 +90,7 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                         variant="outline"
                         size="icon"
                         onClick={exitTVMode}
-                        className="h-14 w-14 rounded-2xl border-white/10 bg-white/5 hover:bg-destructive hover:text-white transition-all group"
+                        className="h-14 w-14 rounded-2xl border-white/10 bg-white/5 hover:bg-destructive hover:text-white transition-all group relative z-[210]"
                     >
                         <X size={24} className="group-hover:rotate-90 transition-transform duration-300" />
                     </Button>
@@ -119,9 +119,9 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                                             <div className="w-8 h-8 rounded-full bg-primary relative" />
                                             Total Approved Revenue
                                         </p>
-                                        <h2 className="text-[12rem] font-black tracking-[-0.06em] leading-none mb-10 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">
+                                        <h2 className="text-[clamp(4rem,10vw,12rem)] font-black tracking-[-0.06em] leading-none mb-10 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 truncate">
                                             {formatCurrency(kpis?.receita_aprovada || 0).split(',')[0]}
-                                            <span className="text-6xl text-white/20">,{formatCurrency(kpis?.receita_aprovada || 0).split(',')[1]}</span>
+                                            <span className="text-[0.4em] text-white/20">,{formatCurrency(kpis?.receita_aprovada || 0).split(',')[1]}</span>
                                         </h2>
                                         <div className="flex items-center gap-8">
                                             <Badge className="text-4xl px-10 py-4 rounded-3xl bg-success text-white font-black">

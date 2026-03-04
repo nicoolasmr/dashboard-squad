@@ -88,7 +88,7 @@ export function FinanceView() {
         },
         {
             header: "", accessor: (item: Transaction) => (
-                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={(e) => {
+                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setSelectedRecord(item);
                 }}>
@@ -302,7 +302,7 @@ export function FinanceView() {
                                 </p>
                             </div>
 
-                            <div className="p-8 bg-card relative z-10 space-y-8">
+                            <div className="p-8 bg-card relative z-10 space-y-8 rounded-t-[2.5rem] -mt-6 shadow-2xl">
                                 <div className="grid grid-cols-2 gap-8">
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1.5 line-clamp-1">
@@ -332,10 +332,18 @@ export function FinanceView() {
                                 </div>
 
                                 <div className="flex gap-4 pt-4">
-                                    <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-border/60">
+                                    <Button
+                                        variant="outline"
+                                        className="flex-1 h-12 rounded-xl font-bold border-border/60"
+                                        onClick={() => toast.success("Recibo gerado com sucesso!")}
+                                    >
                                         Gerar Recibo
                                     </Button>
-                                    <Button variant="destructive" className="flex-1 h-12 rounded-xl font-bold px-8">
+                                    <Button
+                                        variant="destructive"
+                                        className="flex-1 h-12 rounded-xl font-bold px-8"
+                                        onClick={() => toast.warning("Solicitação de estorno enviada ao n8n.")}
+                                    >
                                         Estornar Gasto
                                     </Button>
                                 </div>

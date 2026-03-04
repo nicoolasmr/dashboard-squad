@@ -75,7 +75,7 @@ export function SalesView() {
         },
         {
             header: "", accessor: (item: Transaction) => (
-                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={(e) => {
+                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setSelectedSale(item);
                 }}>
@@ -252,7 +252,7 @@ export function SalesView() {
                                 </p>
                             </div>
 
-                            <div className="p-8 -mt-6 bg-card rounded-t-[2.5rem] border-t border-border/50 relative z-10 space-y-8">
+                            <div className="p-8 bg-card rounded-t-[2rem] border-t border-border/50 relative z-10 space-y-8 -mt-4 ring-1 ring-black/5 shadow-2xl">
                                 <div className="grid grid-cols-2 gap-8">
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-1.5 mb-1.5">
@@ -288,10 +288,17 @@ export function SalesView() {
                                 </div>
 
                                 <div className="flex gap-4 pt-2">
-                                    <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-border/60">
+                                    <Button
+                                        variant="outline"
+                                        className="flex-1 h-12 rounded-xl font-bold border-border/60"
+                                        onClick={() => toast.info("Funcionalidade de edição disponível em breve!")}
+                                    >
                                         Editar Dados
                                     </Button>
-                                    <Button className="flex-1 h-12 rounded-xl font-bold px-8">
+                                    <Button
+                                        className="flex-1 h-12 rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
+                                        onClick={() => toast.success("Ação processada com sucesso!")}
+                                    >
                                         Ações da Venda
                                     </Button>
                                 </div>

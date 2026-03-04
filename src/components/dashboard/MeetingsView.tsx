@@ -87,7 +87,7 @@ export function MeetingsView() {
         },
         {
             header: "", accessor: (item: Meeting) => (
-                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={(e) => {
+                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setSelectedMeeting(item);
                 }}>
@@ -300,7 +300,7 @@ export function MeetingsView() {
                                 </p>
                             </div>
 
-                            <div className="p-10 bg-card relative z-10 space-y-10 -mt-2">
+                            <div className="p-10 bg-card relative z-10 space-y-10 rounded-t-[2.5rem] -mt-6 shadow-2xl">
                                 <div className="grid grid-cols-2 gap-10">
                                     <div className="space-y-1.5">
                                         <p className="text-[10px] uppercase font-heavy text-muted-foreground tracking-[0.15em] flex items-center gap-2">
@@ -338,10 +338,20 @@ export function MeetingsView() {
                                 )}
 
                                 <div className="flex gap-4 pt-4">
-                                    <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold border-border/60 hover:bg-muted/50">
+                                    <Button
+                                        variant="outline"
+                                        className="flex-1 h-14 rounded-2xl font-bold border-border/60 hover:bg-muted/50"
+                                        onClick={() => toast.info("Remarcação de agenda aberta no Calendário.")}
+                                    >
                                         Remarcar Agenda
                                     </Button>
-                                    <Button className="flex-1 h-14 rounded-2xl font-bold bg-success hover:bg-success/90">
+                                    <Button
+                                        className="flex-1 h-14 rounded-2xl font-bold bg-success hover:bg-success/90 shadow-lg shadow-success/20"
+                                        onClick={() => {
+                                            toast.success("Reunião marcada como concluída!");
+                                            setSelectedMeeting(null);
+                                        }}
+                                    >
                                         Concluir Reunião
                                     </Button>
                                 </div>
