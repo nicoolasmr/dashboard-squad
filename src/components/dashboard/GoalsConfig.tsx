@@ -22,8 +22,8 @@ interface GoalsConfigProps {
 }
 
 export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
-    const currentMes = new Date().toISOString().slice(0, 7); // "2026-03"
-    const { goal, save } = useGoals(currentMes);
+    const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7)); // "2026-03"
+    const { goal, save, loading: loadingGoal } = useGoals(selectedMonth);
     const [saving, setSaving] = useState(false);
 
     const [form, setForm] = useState({
@@ -32,7 +32,7 @@ export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
         meta_lucro: "",
     });
 
-    // Pre-fill form when goal loads
+    // Pre-fill form when goal loads or month changes
     useEffect(() => {
         if (goal) {
             setForm({
@@ -40,8 +40,10 @@ export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
                 meta_vendas: goal.meta_vendas ? String(goal.meta_vendas) : "",
                 meta_lucro: goal.meta_lucro ? String(goal.meta_lucro) : "",
             });
+        } else {
+            setForm({ meta_receita: "", meta_vendas: "", meta_lucro: "" });
         }
-    }, [goal]);
+    }, [goal, selectedMonth]);
 
     const handleSave = async () => {
         setSaving(true);
@@ -60,10 +62,6 @@ export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
         }
     };
 
-    const mesFormatted = new Date(currentMes + "-01").toLocaleDateString("pt-BR", {
-        month: "long", year: "numeric"
-    });
-
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-lg rounded-[2.5rem] border-border/60 p-8">
@@ -75,11 +73,23 @@ export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
                         Definir Meta Mensal
                     </DialogTitle>
                     <DialogDescription>
-                        Metas para <span className="font-bold capitalize text-foreground">{mesFormatted}</span>. As barras de progresso atualizam automaticamente.
+                        Ajuste as metas para o período selecionado. As barras de progresso atualizam automaticamente.
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-5 my-6">
+                    <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">
+                            Mês de Referência
+                        </Label>
+                        <Input
+                            type="month"
+                            value={selectedMonth}
+                            onChange={e => setSelectedMonth(e.target.value)}
+                            className="h-12 rounded-xl bg-muted/30 border-border/40 text-lg font-bold"
+                        />
+                    </div>
+
                     <div className="space-y-2">
                         <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">
                             Meta de Receita (R$)
@@ -89,6 +99,7 @@ export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
                             value={form.meta_receita}
                             onChange={e => setForm(f => ({ ...f, meta_receita: e.target.value }))}
                             className="h-12 rounded-xl bg-muted/30 border-border/40 text-lg font-bold"
+                            disabled={loadingGoal}
                         />
                     </div>
                     <div className="space-y-2">
@@ -100,6 +111,7 @@ export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
                             value={form.meta_vendas}
                             onChange={e => setForm(f => ({ ...f, meta_vendas: e.target.value }))}
                             className="h-12 rounded-xl bg-muted/30 border-border/40 text-lg font-bold"
+                            disabled={loadingGoal}
                         />
                     </div>
                     <div className="space-y-2">
@@ -111,13 +123,15 @@ export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
                             value={form.meta_lucro}
                             onChange={e => setForm(f => ({ ...f, meta_lucro: e.target.value }))}
                             className="h-12 rounded-xl bg-muted/30 border-border/40 text-lg font-bold"
+                            disabled={loadingGoal}
                         />
                     </div>
                 </div>
 
                 <DialogFooter className="gap-3">
                     <Button
-                        className="rounded-xl border border-border/60 bg-transparent hover:bg-muted/50"
+                        variant="outline"
+                        className="rounded-xl border-border/60 hover:bg-muted/50"
                         onClick={onClose}
                         disabled={saving}
                     >
@@ -126,7 +140,7 @@ export function GoalsConfig({ open, onClose }: GoalsConfigProps) {
                     <Button
                         className="rounded-xl gap-2 px-8 bg-primary font-bold"
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={saving || loadingGoal}
                     >
                         {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
                         {saving ? "Salvando..." : "Salvar Meta"}
