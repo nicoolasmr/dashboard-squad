@@ -59,7 +59,6 @@ export function SalesView() {
                     'REEMBOLSADO': 'outline'
                 };
                 return (
-                    // @ts-ignore
                     <Badge variant={variants[item.status] as any} className="rounded-lg px-2.5 py-0.5 font-bold border-none capitalize">
                         {item.status.toLowerCase()}
                     </Badge>
@@ -69,7 +68,6 @@ export function SalesView() {
         {
             header: "Origem",
             accessor: (item: Transaction) => (
-                // @ts-ignore
                 <Badge variant="secondary" className="rounded-lg px-2 py-0.5 text-[10px] font-bold">
                     {item.origem}
                 </Badge>
@@ -77,7 +75,6 @@ export function SalesView() {
         },
         {
             header: "", accessor: (item: Transaction) => (
-                // @ts-ignore
                 <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={(e) => {
                     e.stopPropagation();
                     setSelectedSale(item);
@@ -157,7 +154,6 @@ export function SalesView() {
                             className="h-14 pl-12 pr-4 bg-muted/40 border-border/50 rounded-2xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all text-base"
                         />
                     </div>
-                    {/* @ts-ignore */}
                     <Button variant="outline" className="h-14 px-8 rounded-2xl border-border/60 hover:bg-muted font-bold text-sm">
                         <Filter size={18} className="mr-2" />
                         Filtros Avançados
@@ -220,7 +216,6 @@ export function SalesView() {
                     </div>
 
                     <DialogFooter className="gap-3">
-                        {/* @ts-ignore */}
                         <Button variant="ghost" onClick={() => setIsNewSaleOpen(false)} className="rounded-xl font-bold h-12">
                             Cancelar
                         </Button>
@@ -244,7 +239,6 @@ export function SalesView() {
                         <>
                             <div className="bg-primary/5 p-8 pb-12 relative">
                                 <div className="absolute top-8 right-8">
-                                    {/* @ts-ignore */}
                                     <Badge variant="success" className="rounded-xl px-4 py-1.5 font-bold uppercase tracking-wider border-none text-xs shadow-lg shadow-success/10">
                                         {selectedSale.status}
                                     </Badge>
@@ -294,7 +288,6 @@ export function SalesView() {
                                 </div>
 
                                 <div className="flex gap-4 pt-2">
-                                    {/* @ts-ignore */}
                                     <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-border/60">
                                         Editar Dados
                                     </Button>

@@ -44,7 +44,7 @@ export function ZeroState({
 
             <h3 className="text-3xl font-black tracking-tight text-foreground mb-4 leading-tight">{title}</h3>
             <p className="text-muted-foreground text-lg max-w-lg mx-auto font-medium mb-10 leading-relaxed italic">
-                "{description}"
+                &quot;{description}&quot;
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">

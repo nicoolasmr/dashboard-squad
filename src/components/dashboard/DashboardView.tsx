@@ -175,7 +175,6 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                     <Tooltip
                                         cursor={{ stroke: 'var(--primary)', strokeWidth: 1, strokeDasharray: '4 4' }}
                                         contentStyle={{ backgroundColor: "var(--card)", borderRadius: "20px", border: "1px solid var(--border)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)", padding: "12px 16px" }}
-                                        // @ts-ignore
                                         formatter={(val: any) => [formatCurrency(Number(val)), "Valor"]}
                                         labelStyle={{ fontWeight: 800, marginBottom: "4px", color: "var(--foreground)" }}
                                     />
@@ -211,13 +210,11 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                         animationDuration={1500}
                                     >
                                         {displayOriginData.map((entry, index) => (
-                                            // @ts-ignore
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={8} />
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
                                     <Tooltip
                                         contentStyle={{ borderRadius: "16px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}
-                                        // @ts-ignore
                                         formatter={(val: any) => formatCurrency(Number(val))}
                                     />
                                 </PieChart>
@@ -254,7 +251,6 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                 Vendas Recentes
                             </CardTitle>
                         </div>
-                        {/* @ts-ignore */}
                         <Button variant="ghost" className="rounded-xl font-bold gap-2 text-primary hover:bg-primary/5">
                             Ver Todas <ArrowRight size={14} />
                         </Button>
@@ -273,7 +269,6 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm font-black text-foreground">{formatCurrency(sale.valor)}</p>
-                                    {/* @ts-ignore */}
                                     <Badge variant="success" className="h-4 text-[9px] font-black uppercase rounded-sm border-none bg-success/20 text-success">
                                         {sale.status}
                                     </Badge>
@@ -291,7 +286,6 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                 Próximas Reuniões
                             </CardTitle>
                         </div>
-                        {/* @ts-ignore */}
                         <Button variant="ghost" className="rounded-xl font-bold gap-2 text-success hover:bg-success/5">
                             Acessar Agenda <ArrowRight size={14} />
                         </Button>
@@ -310,7 +304,6 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm font-black text-foreground">{formatDate(meeting.data_hora)}</p>
-                                    {/* @ts-ignore */}
                                     <Badge variant="primary" className="h-4 text-[9px] font-black uppercase rounded-sm border-none bg-primary/20 text-primary">
                                         {meeting.canal}
                                     </Badge>

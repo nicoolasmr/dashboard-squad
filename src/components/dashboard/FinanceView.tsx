@@ -69,7 +69,6 @@ export function FinanceView() {
                     'CANCELADO': 'destructive',
                 };
                 return (
-                    // @ts-ignore
                     <Badge variant={variants[item.status] as any} className="rounded-lg px-2.5 py-0.5 font-bold border-none capitalize">
                         {item.status.toLowerCase()}
                     </Badge>
@@ -141,7 +140,6 @@ export function FinanceView() {
                     <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Custos & Despesas</h1>
                     <p className="text-muted-foreground mt-2 text-sm font-medium">Controle total do fluxo de saída e saúde financeira.</p>
                 </div>
-                {/* @ts-ignore */}
                 <Button
                     onClick={() => setIsNewRecordOpen(true)}
                     variant="destructive"
@@ -209,7 +207,6 @@ export function FinanceView() {
                                 className="h-12 pl-12 bg-muted/30 border-border/50 rounded-xl"
                             />
                         </div>
-                        {/* @ts-ignore */}
                         <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-border/60">
                             <Filter size={18} />
                         </Button>
@@ -267,12 +264,10 @@ export function FinanceView() {
                         </div>
                     </div>
 
-                    {/* @ts-ignore */}
                     <DialogFooter className="gap-3">
                         <Button variant="ghost" onClick={() => setIsNewRecordOpen(false)} className="rounded-xl font-bold h-12">
                             Cancelar
                         </Button>
-                        {/* @ts-ignore */}
                         <Button
                             variant="destructive"
                             className="rounded-xl font-bold h-12 px-8"
@@ -294,7 +289,6 @@ export function FinanceView() {
                         <>
                             <div className="bg-error/5 p-8 pb-12 relative border-b border-error/10">
                                 <div className="absolute top-8 right-8">
-                                    {/* @ts-ignore */}
                                     <Badge variant={selectedRecord.status === 'PAGO' ? 'success' : 'warning'} className="rounded-xl px-4 py-1.5 font-bold uppercase tracking-wider border-none text-xs">
                                         {selectedRecord.status}
                                     </Badge>

@@ -79,7 +79,6 @@ export function MeetingsView() {
                     'REMARCADA': 'outline'
                 };
                 return (
-                    // @ts-ignore
                     <Badge variant={variants[item.status] as any} className="rounded-lg px-2.5 py-0.5 font-bold border-none capitalize">
                         {item.status.toLowerCase()}
                     </Badge>
@@ -269,7 +268,6 @@ export function MeetingsView() {
                             <Textarea id="notes" rows={3} placeholder="O que será discutido?" className="rounded-xl bg-muted/30 border-border/40 resize-none p-4" />
                         </div>
 
-                        {/* @ts-ignore */}
                         <DialogFooter className="mt-4 gap-3">
                             <Button variant="ghost" type="button" onClick={() => setIsNewMeetingOpen(false)} className="rounded-xl font-bold h-12 h-12">
                                 Cancelar
@@ -289,7 +287,6 @@ export function MeetingsView() {
                         <>
                             <div className="bg-primary/5 p-10 pb-14 relative border-b border-primary/10">
                                 <div className="absolute top-10 right-10">
-                                    {/* @ts-ignore */}
                                     <Badge variant="primary" className="rounded-xl px-4 py-1.5 font-bold uppercase tracking-wider border-none text-[10px] shadow-lg shadow-primary/10">
                                         {selectedMeeting.status}
                                     </Badge>
@@ -341,7 +338,6 @@ export function MeetingsView() {
                                 )}
 
                                 <div className="flex gap-4 pt-4">
-                                    {/* @ts-ignore */}
                                     <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold border-border/60 hover:bg-muted/50">
                                         Remarcar Agenda
                                     </Button>

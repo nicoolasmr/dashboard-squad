@@ -78,7 +78,6 @@ export function ConnectionSettings({ isOpen, onClose }: ConnectionSettingsProps)
                 </div>
 
                 <DialogFooter className="gap-2">
-                    {/* @ts-ignore */}
                     <Button variant="ghost" onClick={onClose} className="rounded-xl font-bold">Cancelar</Button>
                     <Button onClick={handleSave} className="rounded-xl font-bold px-8 shadow-lg shadow-primary/20">
                         <Save size={18} className="mr-2" />

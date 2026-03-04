@@ -207,7 +207,6 @@ export function ImportView() {
                                     <h2 className="text-2xl font-bold">Validar Processamento</h2>
                                     <p className="text-muted-foreground">Revisamos {rawData.length} linhas. Tudo pronto para o envio?</p>
                                 </div>
-                                {/* @ts-ignore */}
                                 <Badge variant="success" className="h-fit">Pronto para Importar</Badge>
                             </div>
 

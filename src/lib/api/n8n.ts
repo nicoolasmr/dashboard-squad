@@ -34,7 +34,7 @@ export class N8nService {
         return response.json();
     }
 
-    static async getDashboard(filters: any = {}): Promise<DashboardData> {
+    static async getDashboard(filters: Record<string, string> = {}): Promise<DashboardData> {
         // In a real app, filters would be query params
         const query = new URLSearchParams(filters).toString();
         return this.request<DashboardData>(`/webhook/api/dashboard${query ? `?${query}` : ""}`);
@@ -62,9 +62,15 @@ export class N8nService {
         const queryString = query.toString();
         const endpoint = `/webhook/api/meetings${queryString ? `?${queryString}` : ""}`;
 
-        const response = await this.request<any>(endpoint);
-        // n8n might return the array directly or in a nested object
-        return response.meetings || response;
+        interface MeetingResponse {
+            meetings?: Meeting[];
+            [key: string]: unknown;
+        }
+
+        const response = await this.request<MeetingResponse | Meeting[]>(endpoint);
+
+        if (Array.isArray(response)) return response;
+        return response.meetings || [];
     }
 
     static async createMeeting(payload: Partial<Meeting>): Promise<{ ok: boolean; id: string }> {
@@ -81,7 +87,7 @@ export class N8nService {
         });
     }
 
-    static async importTransactions(payload: { source: string; rows: any[] }): Promise<ImportResult> {
+    static async importTransactions(payload: { source: string; rows: Record<string, unknown>[] }): Promise<ImportResult> {
         return this.request<ImportResult>("/webhook/api/import/transactions", {
             method: "POST",
             body: JSON.stringify(payload),
