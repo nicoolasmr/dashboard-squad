@@ -305,7 +305,12 @@ export function SalesView() {
                         </div>
                         <div className="space-y-2">
                             <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Valor (R$)</Label>
-                            <Input value={form.valor} onChange={e => setForm(f => ({ ...f, valor: e.target.value }))} type="number" step="0.01" placeholder="0,00" className="h-12 rounded-xl bg-muted/30 border-border/40 font-mono" />
+                            <Input
+                                value={form.valor}
+                                onChange={e => setForm(f => ({ ...f, valor: e.target.value }))}
+                                placeholder="0,00"
+                                className="h-12 rounded-xl bg-muted/30 border-border/40 font-mono"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Origem da Venda</Label>
@@ -337,11 +342,19 @@ export function SalesView() {
                             onClick={async () => {
                                 setSaving(true);
                                 try {
+                                    // Parse value handling Brazilian dot/comma typos
+                                    const rawValue = form.valor.replace(/\./g, '').replace(',', '.');
+                                    const parsedValor = parseFloat(rawValue);
+
+                                    if (isNaN(parsedValor)) {
+                                        throw new Error("Valor inválido. Use apenas números.");
+                                    }
+
                                     await create({
                                         tipo: "RECEITA",
                                         status: "PENDENTE",
                                         data: form.data,
-                                        valor: parseFloat(form.valor),
+                                        valor: parsedValor,
                                         nome: form.nome,
                                         email: form.email,
                                         produto: form.produto,
@@ -353,9 +366,11 @@ export function SalesView() {
                                     toast.success("Venda registrada com sucesso!");
                                     setIsNewSaleOpen(false);
                                     setForm({ nome: "", email: "", produto: "", valor: "", origem: "MANUAL", data: new Date().toISOString().slice(0, 10) });
-                                } catch (e) {
+                                } catch (e: any) {
                                     console.error("Save error:", e);
-                                    toast.error(e instanceof Error ? e.message : "Erro ao salvar venda.");
+                                    // Show precise error message from Supabase or custom error
+                                    const errorMsg = e?.message || e?.details || "Erro desconhecido ao salvar.";
+                                    toast.error(`Erro: ${errorMsg}`);
                                 } finally {
                                     setSaving(false);
                                 }
