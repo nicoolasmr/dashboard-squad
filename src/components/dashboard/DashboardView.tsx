@@ -36,6 +36,8 @@ interface DashboardViewProps {
     loading: boolean;
     isTVMode: boolean;
     lastSync: Date;
+    onViewSales?: () => void;
+    onViewMeetings?: () => void;
 }
 
 const COLORS = ["#0066ff", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
@@ -51,7 +53,7 @@ const REVENUE_DATA = [
     { name: "26/02", receita: 3490, despesas: 4300 },
 ];
 
-export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardViewProps) {
+export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, onViewMeetings }: DashboardViewProps) {
     const kpis = data?.kpis;
     const transactions = data?.transactions || [];
     const meetings = data?.meetings || [];
@@ -251,7 +253,11 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                 Vendas Recentes
                             </CardTitle>
                         </div>
-                        <Button variant="ghost" className="rounded-xl font-bold gap-2 text-primary hover:bg-primary/5">
+                        <Button
+                            variant="ghost"
+                            className="rounded-xl font-bold gap-2 text-primary hover:bg-primary/5"
+                            onClick={onViewSales}
+                        >
                             Ver Todas <ArrowRight size={14} />
                         </Button>
                     </CardHeader>
@@ -286,7 +292,11 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                 Próximas Reuniões
                             </CardTitle>
                         </div>
-                        <Button variant="ghost" className="rounded-xl font-bold gap-2 text-success hover:bg-success/5">
+                        <Button
+                            variant="ghost"
+                            className="rounded-xl font-bold gap-2 text-success hover:bg-success/5"
+                            onClick={onViewMeetings}
+                        >
                             Acessar Agenda <ArrowRight size={14} />
                         </Button>
                     </CardHeader>

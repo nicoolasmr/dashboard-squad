@@ -124,7 +124,16 @@ function DashboardContent() {
           />
         ) : (
           <div className="space-y-12">
-            {activeTab === "dashboard" && <DashboardView data={data} loading={loading} isTVMode={isTVMode} lastSync={lastSync} />}
+            {activeTab === "dashboard" && (
+              <DashboardView
+                data={data}
+                loading={loading}
+                isTVMode={isTVMode}
+                lastSync={lastSync}
+                onViewSales={() => setActiveTab("sales")}
+                onViewMeetings={() => setActiveTab("meetings")}
+              />
+            )}
             {activeTab === "sales" && <SalesView />}
             {activeTab === "finance" && <FinanceView />}
             {activeTab === "meetings" && <MeetingsView />}
