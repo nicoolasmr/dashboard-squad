@@ -5,11 +5,11 @@ Um dashboard premium SaaS autônomo projetado para operação em tempo real e ex
 ## 🚀 Funcionalidades Principais
 
 *   **Visão Geral (BI)**: Gráficos interativos de Receita, Despesas e Origem de Vendas usando Recharts.
-*   **Gestão de Vendas**: Tabela dinâmica com ações rápidas para aprovação e estorno de transações.
-*   **Controle Financeiro**: Gestão dual de Despesas e Custos com cálculo automático de totais.
-*   **Agenda de Reuniões**: Cronograma diário com ícones de canal (Zoom, Meet, Call) e controle de status.
-*   **Importação Inteligente**: Ferramenta de importação de planilhas (CSV/XLSX) com mapeamento de colunas dinâmico.
-*   **Modo TV Center**: Interface de alta visibilidade com rotação automática de telas a cada 15 segundos e sincronização em tempo real.
+*   **Gestão de Vendas**: Tabela dinâmica com **filtros avançados por status e origem**.
+*   **Controle Financeiro**: Gestão dual de Despesas e Custos com **campos de recorrência** e exclusão permanente.
+*   **Modo Edição (Full Edit)**: Fluxo completo de edição para clientes, valores e reuniões diretamente nos detalhes.
+*   **Agenda de Reuniões**: Cronograma diário com ícones de canal e filtros inteligentes.
+*   **Modo TV Center 2.0**: Interface ultra-responsiva com **tipografia fluida (clamp)** para estatísticas gigantes e abertura em aba externa.
 
 ## 🛠️ Stack Tecnológica
 
