@@ -248,7 +248,7 @@ export function MeetingsView() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <form className="flex flex-col gap-6 my-8" onSubmit={(e) => {
+                    <form className="flex flex-col gap-6 my-8 pointer-events-auto" onSubmit={(e) => {
                         e.preventDefault();
                         toast.success("Evento sincronizado com o dashboard!");
                         setIsNewMeetingOpen(false);

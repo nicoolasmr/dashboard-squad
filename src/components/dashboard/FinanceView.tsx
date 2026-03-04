@@ -299,7 +299,7 @@ export function FinanceView() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 pointer-events-auto">
                         <div className="space-y-2 md:col-span-2">
                             <Label htmlFor="desc" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Descrição do Gasto</Label>
                             <Input id="desc" placeholder="Ex: Upgrade Servidores AWS" className="h-12 rounded-xl bg-muted/30 border-border/40" />

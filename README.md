@@ -10,6 +10,8 @@ Um dashboard premium SaaS autônomo projetado para operação em tempo real e ex
 *   **Modo Edição (Full Edit)**: Fluxo completo de edição para clientes, valores e reuniões diretamente nos detalhes.
 *   **Agenda de Reuniões**: Cronograma diário com ícones de canal e filtros inteligentes.
 *   **Modo TV Center 2.0**: Interface ultra-responsiva com **tipografia fluida (clamp)** para estatísticas gigantes e abertura em aba externa.
+*   **Estabilidade Operacional**: Z-index harmonizado e interatividade total em modais.
+*   **Roadmap 2026**: Planejamento integrado para visualizações de Gantt.
 
 ## 🛠️ Stack Tecnológica
 

@@ -225,7 +225,7 @@ export function SalesView() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 pointer-events-auto">
                         <div className="space-y-2">
                             <Label htmlFor="nome" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Nome do Cliente</Label>
                             <Input id="nome" placeholder="John Doe" className="h-12 rounded-xl bg-muted/30 border-border/40" />
