@@ -105,7 +105,7 @@ export function SalesView() {
         },
         {
             id: "2",
-            data: "2026-03-02",
+            data: "2026-03-01",
             tipo: "RECEITA",
             status: "PENDENTE",
             valor: 497.00,
@@ -117,6 +117,36 @@ export function SalesView() {
             email: "maria@exemplo.com",
             responsavel: "Time Vendas",
             descricao: "Aguardando boleto"
+        },
+        {
+            id: "3",
+            data: "2026-02-28",
+            tipo: "RECEITA",
+            status: "APROVADO",
+            valor: 2997.00,
+            categoria: "Venda",
+            subcategoria: "High Ticket",
+            origem: "MANUAL",
+            produto: "Consultoria Premium",
+            nome: "João Pedro",
+            email: "jp@empresa.com",
+            responsavel: "Nicolas Moreira",
+            descricao: "Fechamento consultoria anual"
+        },
+        {
+            id: "4",
+            data: "2026-02-26",
+            tipo: "RECEITA",
+            status: "CANCELADO",
+            valor: 997.00,
+            categoria: "Venda",
+            subcategoria: "Curso",
+            origem: "STRIPE",
+            produto: "Workshop Ads",
+            nome: "Ana Lima",
+            email: "ana@exemplo.com",
+            responsavel: "Maria Silva",
+            descricao: "Chargeback solicitado"
         }
     ];
 
