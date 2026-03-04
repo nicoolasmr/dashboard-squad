@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dashboard Operacional | Squad
 
-## Getting Started
+Um dashboard premium SaaS autônomo projetado para operação em tempo real e exibição em centros de comando (Modo TV), integrado nativamente com o n8n Cloud.
 
-First, run the development server:
+## 🚀 Funcionalidades Principais
+
+*   **Visão Geral (BI)**: Gráficos interativos de Receita, Despesas e Origem de Vendas usando Recharts.
+*   **Gestão de Vendas**: Tabela dinâmica com ações rápidas para aprovação e estorno de transações.
+*   **Controle Financeiro**: Gestão dual de Despesas e Custos com cálculo automático de totais.
+*   **Agenda de Reuniões**: Cronograma diário com ícones de canal (Zoom, Meet, Call) e controle de status.
+*   **Importação Inteligente**: Ferramenta de importação de planilhas (CSV/XLSX) com mapeamento de colunas dinâmico.
+*   **Modo TV Center**: Interface de alta visibilidade com rotação automática de telas a cada 15 segundos e sincronização em tempo real.
+
+## 🛠️ Stack Tecnológica
+
+*   **Framework**: Next.js 15 (App Router)
+*   **Estilização**: Tailwind CSS v4 + Glassmorphism
+*   **Animações**: Framer Motion
+*   **Ícones**: Lucide React
+*   **Gráficos**: Recharts
+*   **API**: Integração transparente com Webhooks do n8n
+
+## 🔗 Integração com n8n
+
+O dashboard consome dados via cabeçalhos de segurança customizados. 
+
+### Configuração
+1. Vá em **Configurações** (ícone de engrenagem no Navbar).
+2. Configure a **Base URL** da sual instância n8n.
+3. Defina o seu **X-DASH-TOKEN** (Token de segurança).
+
+### Webhooks Necessários
+O `N8nService` espera os seguintes endpoints configurados no seu n8n:
+*   `GET /webhook/api/dashboard`: Dados consolidados para os KPIs e gráficos.
+*   `POST /webhook/api/transactions`: Registro de novas vendas/despesas.
+*   `GET /webhook/api/meetings`: Lista de reuniões agendadas.
+
+## 🛡️ Segurança
+
+*   **Zero Hardcoded Secrets**: Todas as credenciais são armazenadas no `localStorage` do cliente.
+*   **Sanitização**: Uso estrito de `URLSearchParams` para prevenir injeções em rotas dinâmicas.
+*   **HTTPS**: Recomenda-se o deployment sob SSL para proteger o Token em trânsito.
+
+## 📦 Como Rodar Localmente
 
 ```bash
+# Instalar dependências
+npm install
+
+# Rodar em desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000) para acessar a interface de operação.
+Adicione `?tv=1` à URL para entrar diretamente no **Modo TV**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+Desenvolvido com ⚡ por Antigravity.
