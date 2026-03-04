@@ -125,9 +125,9 @@ export function MeetingsView() {
     const [channelFilter, setChannelFilter] = useState<string>("ALL");
 
     const filteredData = data.filter(item => {
-        const matchesSearch = item.titulo.toLowerCase().includes(search.toLowerCase()) ||
-            item.cliente.toLowerCase().includes(search.toLowerCase()) ||
-            item.owner.toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = (item.titulo?.toLowerCase() || "").includes(search.toLowerCase()) ||
+            (item.cliente?.toLowerCase() || "").includes(search.toLowerCase()) ||
+            (item.owner?.toLowerCase() || "").includes(search.toLowerCase());
 
         const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
         const matchesChannel = channelFilter === "ALL" || item.canal === channelFilter;

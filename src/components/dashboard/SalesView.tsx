@@ -123,9 +123,9 @@ export function SalesView() {
     const [originFilter, setOriginFilter] = useState<string>("ALL");
 
     const filteredData = data.filter(item => {
-        const matchesSearch = item.nome.toLowerCase().includes(search.toLowerCase()) ||
-            item.produto.toLowerCase().includes(search.toLowerCase()) ||
-            item.email?.toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = (item.nome?.toLowerCase() || "").includes(search.toLowerCase()) ||
+            (item.produto?.toLowerCase() || "").includes(search.toLowerCase()) ||
+            (item.email?.toLowerCase() || "").includes(search.toLowerCase());
 
         const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
         const matchesOrigin = originFilter === "ALL" || item.origem === originFilter;
