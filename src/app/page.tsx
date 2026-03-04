@@ -20,7 +20,6 @@ import { ImportView } from "@/components/import/ImportTool";
 import { ModoTV } from "@/components/tv/ModoTV";
 import { ConnectionSettings } from "@/components/layout/ConnectionSettings";
 import { GoalsConfig } from "@/components/dashboard/GoalsConfig";
-import { ZeroState } from "@/components/ui/zero-state";
 import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -111,9 +110,6 @@ function DashboardContent() {
     return <ModoTV data={data} loading={loading} lastSync={lastSync} />;
   }
 
-  // Determine if we show Zero State
-  const hasNoData = !data || (data.transactions.length === 0 && data.meetings.length === 0);
-  const showZeroState = !isSimulationMode && hasNoData && !loading;
 
   return (
     <main className="min-h-screen bg-background transition-colors duration-500 pt-20 lg:pl-72">
@@ -135,15 +131,6 @@ function DashboardContent() {
             <Loader2 size={48} className="animate-spin" strokeWidth={1} />
             <p className="text-sm font-black uppercase tracking-[0.2em] opacity-40">Decrypting Sync Stream...</p>
           </div>
-        ) : showZeroState ? (
-          <ZeroState
-            title="Pronto para Decolar?"
-            description="Seu painel de controle está operando em modo real, mas ainda não detectamos eventos sincronizados do seu Webhook n8n."
-            actionLabel="Tentar Sincronizar Agora"
-            onAction={fetchData}
-            secondaryActionLabel="Ver Dados de Demonstração"
-            onSecondaryAction={() => setIsSimulationMode(true)}
-          />
         ) : (
           <div className="space-y-12">
             {activeTab === "dashboard" && (
