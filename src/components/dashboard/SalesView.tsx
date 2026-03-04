@@ -354,7 +354,8 @@ export function SalesView() {
                                     setIsNewSaleOpen(false);
                                     setForm({ nome: "", email: "", produto: "", valor: "", origem: "MANUAL", data: new Date().toISOString().slice(0, 10) });
                                 } catch (e) {
-                                    toast.error("Erro ao salvar venda.");
+                                    console.error("Save error:", e);
+                                    toast.error(e instanceof Error ? e.message : "Erro ao salvar venda.");
                                 } finally {
                                     setSaving(false);
                                 }

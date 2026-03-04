@@ -14,6 +14,7 @@ export type OriginType =
     | 'STRIPE'
     | 'MANUAL'
     | 'PLANILHA'
+    | 'ASAAS'
     | 'OUTRO';
 
 export type MeetingStatus =
