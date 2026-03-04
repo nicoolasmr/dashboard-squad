@@ -75,7 +75,7 @@ export function ZeroState({
                             <PlusCircle size={18} />
                         </div>
                         <p className="text-sm font-black text-foreground">Conexão API</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Conecte sua conta n8n via Webhook para receber dados instantâneos.</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">Conecte seus Webhooks nativos para receber dados instantâneos.</p>
                     </CardContent>
                 </Card>
                 <Card className="rounded-3xl border-border/40 bg-card/30 backdrop-blur-sm">

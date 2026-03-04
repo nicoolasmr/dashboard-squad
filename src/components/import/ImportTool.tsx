@@ -80,7 +80,7 @@ export function ImportView() {
         <div className="flex flex-col gap-6 animate-in fade-in duration-500">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Importar Planilhas</h1>
-                <p className="text-muted-foreground mt-1">Transforme seus arquivos Excel/CSV em dados acionáveis no n8n.</p>
+                <p className="text-muted-foreground mt-1">Transforme seus arquivos Excel/CSV em dados acionáveis no seu Dashboard.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -90,7 +90,7 @@ export function ImportView() {
                         { id: 1, label: "Seleção e Upload", desc: "Escolha o tipo e arquivo" },
                         { id: 2, label: "Mapeamento", desc: "Associe as colunas" },
                         { id: 3, label: "Validação", desc: "Verifique inconsistências" },
-                        { id: 4, label: "Finalizar", desc: "Enviar para o n8n" },
+                        { id: 4, label: "Finalizar", desc: "Sincronizar Cloud" },
                     ].map((s) => (
                         <div
                             key={s.id}
@@ -126,7 +126,7 @@ export function ImportView() {
                             </div>
                             <div className="space-y-2">
                                 <h2 className="text-2xl font-bold">O que vamos importar hoje?</h2>
-                                <p className="text-muted-foreground">Selecione o tipo de dado para garantir que o n8n receba os campos corretos.</p>
+                                <p className="text-muted-foreground">Selecione o tipo de dado para garantir que o sistema receba os campos corretos.</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 w-full">
@@ -268,7 +268,7 @@ export function ImportView() {
                             </div>
                             <h2 className="text-3xl font-extrabold mb-2">Missão Cumprida!</h2>
                             <p className="text-muted-foreground mb-8">
-                                Enviamos {rawData.length} registros para o processamento do n8n Cloud. Os dados estarão disponíveis no dashboard em alguns segundos.
+                                Enviamos {rawData.length} registros para o processamento no Cloud. Os dados estarão disponíveis no dashboard em alguns segundos.
                             </p>
                             <div className="grid grid-cols-2 gap-4 w-full">
                                 <button
