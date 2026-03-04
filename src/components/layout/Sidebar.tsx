@@ -25,33 +25,49 @@ export const TABS = [
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     return (
-        <aside className="fixed left-0 top-16 bottom-0 w-64 bg-card border-r border-border hidden lg:flex flex-col py-6 px-4 gap-2 shadow-sm">
-            <div className="mb-4 px-2">
-                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menu Principal</h2>
+        <aside className="fixed left-0 top-16 bottom-0 w-64 bg-card/50 backdrop-blur-sm border-r border-border hidden lg:flex flex-col py-8 px-4 gap-1.5 transition-all duration-300">
+            <div className="mb-6 px-3">
+                <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-70">Navegação</h2>
             </div>
-            {TABS.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={cn(
-                            "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                            activeTab === tab.id
-                                ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                        )}
-                    >
-                        <Icon size={18} />
-                        <span>{tab.label}</span>
-                    </button>
-                );
-            })}
 
-            <div className="mt-auto px-4 py-4 bg-muted/50 rounded-2xl border border-border/50">
-                <div className="flex flex-col gap-1">
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest">Plano</p>
-                    <p className="text-sm font-semibold">Enterprise Scale</p>
+            <nav className="flex flex-col gap-1.5 flex-1">
+                {TABS.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={cn(
+                                "group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 relative overflow-hidden",
+                                isActive
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20 translate-x-1"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                            )}
+                        >
+                            <Icon size={18} className={cn(
+                                "transition-transform duration-300",
+                                isActive ? "scale-110" : "group-hover:scale-110"
+                            )} />
+                            <span>{tab.label}</span>
+
+                            {isActive && (
+                                <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse" />
+                            )}
+                        </button>
+                    );
+                })}
+            </nav>
+
+            <div className="mt-auto p-5 bg-gradient-to-br from-muted/40 to-muted/10 rounded-[2rem] border border-border/40">
+                <div className="flex flex-col gap-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center text-success mb-2">
+                        <div className="w-2 h-2 rounded-full bg-current animate-pulse" />
+                    </div>
+                    <p className="text-[10px] uppercase font-heavy text-muted-foreground/50 tracking-widest">Status da Conta</p>
+                    <p className="text-xs font-bold flex items-center gap-2">
+                        Enterprise Active
+                    </p>
                 </div>
             </div>
         </aside>

@@ -2,7 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { Sun, Moon, Tv, RefreshCw, PlusCircle, Settings } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
+} from "@/components/ui/tooltip";
 
 interface NavbarProps {
     activeTab: string;
@@ -47,70 +53,88 @@ export function Navbar({ onRefresh, onNewSale, onNewExpense, onNewMeeting, onSet
     };
 
     return (
-        <nav className="fixed top-0 left-0 right-0 h-16 bg-card border-b border-border z-50 flex items-center justify-between px-6 shadow-sm">
+        <nav className="fixed top-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-md border-b border-border z-50 flex items-center justify-between px-6 transition-all duration-300">
             <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
+                <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-primary/20">
                     D
                 </div>
-                <span className="font-bold text-lg hidden sm:block">
-                    Dashboard <span className="text-muted-foreground font-normal">— Vendas & Financeiro</span>
-                </span>
+                <div className="flex flex-col">
+                    <span className="font-bold text-base leading-tight">Dashboard</span>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold hidden sm:block">Vendas & Financeiro</span>
+                </div>
             </div>
 
-            <div className="flex items-center gap-2">
-                <div className="hidden md:flex items-center gap-2 mr-4 pr-4 border-r border-border">
-                    <button
+            <div className="flex items-center gap-4">
+                <div className="hidden lg:flex items-center gap-2 bg-muted/30 p-1 rounded-2xl border border-border/50">
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={onNewSale}
-                        className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                        className="h-8 rounded-xl text-primary hover:bg-primary/10 hover:text-primary gap-2"
                     >
-                        <PlusCircle size={16} />
-                        <span>Nova Venda</span>
-                    </button>
-                    <button
+                        <PlusCircle size={14} />
+                        Nova Venda
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={onNewExpense}
-                        className="flex items-center gap-2 bg-error/10 text-error hover:bg-error/20 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                        className="h-8 rounded-xl text-error hover:bg-error/10 hover:text-error gap-2"
                     >
-                        <PlusCircle size={16} />
-                        <span>Despesa</span>
-                    </button>
-                    <button
+                        <PlusCircle size={14} />
+                        Despesa
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={onNewMeeting}
-                        className="flex items-center gap-2 bg-success/10 text-success hover:bg-success/20 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                        className="h-8 rounded-xl text-success hover:bg-success/10 hover:text-success gap-2"
                     >
-                        <PlusCircle size={16} />
-                        <span>Reunião</span>
-                    </button>
+                        <PlusCircle size={14} />
+                        Reunião
+                    </Button>
                 </div>
 
+                <div className="w-px h-8 bg-border hidden md:block" />
+
                 <div className="flex items-center gap-1">
-                    <button
-                        onClick={onRefresh}
-                        className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-lg"
-                        title="Atualizar"
-                    >
-                        <RefreshCw size={20} />
-                    </button>
-                    <button
-                        onClick={toggleTheme}
-                        className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-lg"
-                        title="Trocar Tema"
-                    >
-                        {isDark ? <Sun size={20} /> : <Moon size={20} />}
-                    </button>
-                    <button
-                        onClick={toggleTVMode}
-                        className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-lg"
-                        title="Modo TV"
-                    >
-                        <Tv size={20} />
-                    </button>
-                    <button
-                        onClick={onSettings}
-                        className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-lg"
-                        title="Configurações"
-                    >
-                        <Settings size={20} />
-                    </button>
+                    <TooltipProvider delayDuration={300}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" onClick={onRefresh} className="rounded-xl text-muted-foreground">
+                                    <RefreshCw size={18} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Atualizar Dados</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-xl text-muted-foreground">
+                                    {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Trocar Tema</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" onClick={toggleTVMode} className="rounded-xl text-muted-foreground">
+                                    <Tv size={18} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Modo TV</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" onClick={onSettings} className="rounded-xl ml-2 border-border/60 hover:bg-muted/50">
+                                    <Settings size={18} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Configurações</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
         </nav>
