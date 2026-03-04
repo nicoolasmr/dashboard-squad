@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, Calendar, Clock, Video, User, CheckCircle2, XCircle, RotateCcw, MoreHorizontal, MapPin, MessageSquare } from "lucide-react";
+import { Plus, Search, Filter, Calendar, Clock, Video, User, CheckCircle2, XCircle, RotateCcw, MoreHorizontal, MapPin, MessageSquare, LayoutGrid, List } from "lucide-react";
+import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -101,23 +102,43 @@ export function MeetingsView() {
     const data: Meeting[] = [
         {
             id: "m1",
-            data_hora: "2026-03-03T14:00",
-            titulo: "Briefing Projeto X",
+            data_hora: "2026-03-03T10:00",
+            titulo: "Board Review Q1",
             cliente: "Squad Corp",
             owner: "Nicolas Moreira",
-            status: "MARCADA",
-            canal: "ZOOM",
-            notas: "Trazer orçamento detalhado para aprovação final."
+            status: "FEITA",
+            canal: "MEET",
+            notas: "Foco em metas de expansão."
         },
         {
             id: "m2",
-            data_hora: "2026-03-03T16:30",
-            titulo: "Apresentação de Resultados",
+            data_hora: "2026-03-03T14:30",
+            titulo: "Briefing Projeto X",
             cliente: "Tech Solutions",
             owner: "Maria Silva",
-            status: "FEITA",
+            status: "MARCADA",
+            canal: "ZOOM",
+            notas: "Trazer orçamento detalhado."
+        },
+        {
+            id: "m3",
+            data_hora: "2026-03-04T09:00",
+            titulo: "Daily Standup",
+            cliente: "Internal",
+            owner: "Nicolas Moreira",
+            status: "MARCADA",
+            canal: "CALL",
+            notas: ""
+        },
+        {
+            id: "m4",
+            data_hora: "2026-03-04T16:00",
+            titulo: "Customer Success Check-in",
+            cliente: "Global Partners",
+            owner: "Maria Silva",
+            status: "REMARCADA",
             canal: "MEET",
-            notas: "Aprovado sem ressalvas. Enviar contrato."
+            notas: "Solicitaram antecipação."
         }
     ];
 
@@ -136,6 +157,31 @@ export function MeetingsView() {
     });
 
     const [isEditing, setIsEditing] = useState(false);
+    const [viewMode, setViewMode] = useState<"TABLE" | "GANTT">("TABLE");
+
+    // Map meetings to Gantt format
+    const ganttData = filteredData.map(m => {
+        const startDate = new Date(m.data_hora);
+        // Default duration 1 hour for meetings
+        const duration = 60 * 60 * 1000;
+
+        const colors: Record<string, string> = {
+            'MARCADA': '#3b82f6', // blue
+            'FEITA': '#22c55e',   // green
+            'CANCELADA': '#ef4444', // red
+            'NO_SHOW': '#f59e0b', // amber
+            'REMARCADA': '#8b5cf6' // violet
+        };
+
+        return {
+            id: m.id,
+            name: m.titulo,
+            start: startDate.getTime(),
+            duration: duration,
+            color: colors[m.status] || '#94a3b8',
+            status: m.status
+        };
+    });
 
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -204,6 +250,27 @@ export function MeetingsView() {
                     </div>
 
                     <div className="flex gap-4">
+                        <div className="flex bg-muted/20 p-1 rounded-2xl border border-border/50">
+                            <Button
+                                variant={viewMode === "TABLE" ? "default" : "ghost"}
+                                size="sm"
+                                className="rounded-xl h-12 px-4 shadow-sm"
+                                onClick={() => setViewMode("TABLE")}
+                            >
+                                <List size={18} className="mr-2" />
+                                Lista
+                            </Button>
+                            <Button
+                                variant={viewMode === "GANTT" ? "default" : "ghost"}
+                                size="sm"
+                                className="rounded-xl h-12 px-4 shadow-sm"
+                                onClick={() => setViewMode("GANTT")}
+                            >
+                                <LayoutGrid size={18} className="mr-2" />
+                                Gantt
+                            </Button>
+                        </div>
+
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
                             <SelectTrigger className="h-14 w-[160px] rounded-2xl border-border/60 bg-muted/30 font-bold text-xs uppercase tracking-wider">
                                 <SelectValue placeholder="Status" />
@@ -230,12 +297,22 @@ export function MeetingsView() {
                     </div>
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={filteredData}
-                    emptyMessage="Sem reuniões para os critérios de busca."
-                    onRowClick={(item) => setSelectedMeeting(item)}
-                />
+                {viewMode === "TABLE" ? (
+                    <DataTable
+                        columns={columns}
+                        data={filteredData}
+                        emptyMessage="Sem reuniões para os critérios de busca."
+                        onRowClick={(item) => setSelectedMeeting(item)}
+                    />
+                ) : (
+                    <div className="bg-card/30 rounded-[2rem] border border-border/40 p-6">
+                        <div className="flex items-center justify-between mb-6 px-4">
+                            <h3 className="text-lg font-bold">Cronograma de Reuniões</h3>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">Horário Linear</p>
+                        </div>
+                        <GanttChart data={ganttData} type="MEETINGS" height={360} />
+                    </div>
+                )}
             </div>
 
             {/* New Meeting Modal */}

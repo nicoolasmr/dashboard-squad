@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, MoreHorizontal, User, Mail, CreditCard, Calendar, Tag, ExternalLink } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, User, Mail, CreditCard, Calendar, Tag, ExternalLink, LayoutGrid, List } from "lucide-react";
+import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -134,6 +135,32 @@ export function SalesView() {
     });
 
     const [isEditing, setIsEditing] = useState(false);
+    const [viewMode, setViewMode] = useState<"TABLE" | "GANTT">("TABLE");
+
+    // Map sales to Gantt format (Lead -> Closing Cycle)
+    const ganttData = filteredData.map(s => {
+        const closingDate = new Date(s.data);
+        // Simulate a 3-day closing cycle
+        const startDate = new Date(closingDate.getTime() - (3 * 24 * 60 * 60 * 1000));
+        const duration = closingDate.getTime() - startDate.getTime();
+
+        const colors: Record<string, string> = {
+            'APROVADO': '#22c55e',   // green
+            'PENDENTE': '#f59e0b',   // amber
+            'CANCELADO': '#ef4444',  // red
+            'REEMBOLSADO': '#94a3b8' // gray
+        };
+
+        return {
+            id: s.id,
+            name: s.nome || "Cliente",
+            start: startDate.getTime(),
+            duration: duration,
+            color: colors[s.status] || '#3b82f6',
+            status: s.status,
+            value: formatCurrency(s.valor)
+        };
+    });
 
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-3 duration-700">
@@ -166,6 +193,27 @@ export function SalesView() {
                     </div>
 
                     <div className="flex gap-4">
+                        <div className="flex bg-muted/20 p-1 rounded-2xl border border-border/50">
+                            <Button
+                                variant={viewMode === "TABLE" ? "default" : "ghost"}
+                                size="sm"
+                                className="rounded-xl h-12 px-4 shadow-sm"
+                                onClick={() => setViewMode("TABLE")}
+                            >
+                                <List size={18} className="mr-2" />
+                                Lista
+                            </Button>
+                            <Button
+                                variant={viewMode === "GANTT" ? "default" : "ghost"}
+                                size="sm"
+                                className="rounded-xl h-12 px-4 shadow-sm"
+                                onClick={() => setViewMode("GANTT")}
+                            >
+                                <LayoutGrid size={18} className="mr-2" />
+                                Gantt
+                            </Button>
+                        </div>
+
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
                             <SelectTrigger className="h-14 w-[160px] rounded-2xl border-border/60 bg-muted/30 font-bold text-xs uppercase tracking-wider">
                                 <SelectValue placeholder="Status" />
@@ -207,12 +255,22 @@ export function SalesView() {
                     </div>
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={filteredData}
-                    emptyMessage="Nenhuma venda encontrada para os termos buscados."
-                    onRowClick={(item) => setSelectedSale(item)}
-                />
+                {viewMode === "TABLE" ? (
+                    <DataTable
+                        columns={columns}
+                        data={filteredData}
+                        emptyMessage="Nenhuma venda encontrada para os termos buscados."
+                        onRowClick={(item) => setSelectedSale(item)}
+                    />
+                ) : (
+                    <div className="bg-card/30 rounded-[2rem] border border-border/40 p-6">
+                        <div className="flex items-center justify-between mb-6 px-4">
+                            <h3 className="text-lg font-bold">Fluxo de Fechamento (Gantt)</h3>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">Ciclo de 7 dias</p>
+                        </div>
+                        <GanttChart data={ganttData} type="SALES" height={360} />
+                    </div>
+                )}
             </div>
 
             {/* New Sale Modal */}

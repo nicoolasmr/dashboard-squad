@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal, TrendingUp, X } from "lucide-react";
+import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal, TrendingUp, X, LayoutGrid, List } from "lucide-react";
+import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -161,6 +162,30 @@ export function FinanceView() {
     });
 
     const [isEditing, setIsEditing] = useState(false);
+    const [viewMode, setViewMode] = useState<"TABLE" | "GANTT">("TABLE");
+
+    // Map finance to Gantt format (Cash Flow Forecast)
+    const ganttData = filteredData.map(f => {
+        const dueDate = new Date(f.data);
+        // Show as a 1-day point/bar on the timeline
+        const duration = 24 * 60 * 60 * 1000;
+
+        const colors: Record<string, string> = {
+            'PAGO': '#22c55e',     // green
+            'PREVISTO': '#f59e0b', // amber
+            'CANCELADO': '#ef4444' // red
+        };
+
+        return {
+            id: f.id,
+            name: f.descricao,
+            start: dueDate.getTime(),
+            duration: duration,
+            color: colors[f.status] || '#3b82f6',
+            status: f.status,
+            value: formatCurrency(f.valor)
+        };
+    });
 
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-3 duration-700">
@@ -238,6 +263,27 @@ export function FinanceView() {
                             />
                         </div>
                         <div className="flex gap-4">
+                            <div className="flex bg-muted/20 p-1 rounded-2xl border border-border/50">
+                                <Button
+                                    variant={viewMode === "TABLE" ? "default" : "ghost"}
+                                    size="sm"
+                                    className="rounded-xl h-12 px-4 shadow-sm"
+                                    onClick={() => setViewMode("TABLE")}
+                                >
+                                    <List size={18} className="mr-2" />
+                                    Lista
+                                </Button>
+                                <Button
+                                    variant={viewMode === "GANTT" ? "default" : "ghost"}
+                                    size="sm"
+                                    className="rounded-xl h-12 px-4 shadow-sm"
+                                    onClick={() => setViewMode("GANTT")}
+                                >
+                                    <LayoutGrid size={18} className="mr-2" />
+                                    Gantt
+                                </Button>
+                            </div>
+
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
                                 <SelectTrigger className="h-12 w-[140px] rounded-xl border-border/60 bg-muted/20 font-bold text-[10px] uppercase tracking-wider">
                                     <SelectValue placeholder="Status" />
@@ -281,12 +327,22 @@ export function FinanceView() {
                     </div>
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={filteredData}
-                    emptyMessage="Nenhum registro encontrado."
-                    onRowClick={(item) => setSelectedRecord(item)}
-                />
+                {viewMode === "TABLE" ? (
+                    <DataTable
+                        columns={columns}
+                        data={filteredData}
+                        emptyMessage="Nenhum registro encontrado."
+                        onRowClick={(item) => setSelectedRecord(item)}
+                    />
+                ) : (
+                    <div className="bg-card/30 rounded-[2rem] border border-border/40 p-6">
+                        <div className="flex items-center justify-between mb-6 px-4">
+                            <h3 className="text-lg font-bold">Fluxo de Caixa (Forecast)</h3>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">Vencimentos próximos</p>
+                        </div>
+                        <GanttChart data={ganttData} type="FINANCE" height={360} />
+                    </div>
+                )}
             </div>
 
             {/* Registration Modal */}
