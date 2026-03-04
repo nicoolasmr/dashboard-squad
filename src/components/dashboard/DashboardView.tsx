@@ -129,7 +129,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync }: DashboardVi
                                 <YAxis hide />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: "var(--card)", borderRadius: "16px", border: "1px solid var(--border)", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}
-                                    formatter={(val: number | string) => formatCurrency(Number(val))}
+                                    formatter={(val: number | string | undefined) => val !== undefined ? formatCurrency(Number(val)) : ""}
                                 />
                                 <Area type="monotone" dataKey="receita" stroke="#0066ff" strokeWidth={3} fillOpacity={1} fill="url(#colorRec)" />
                                 <Area type="monotone" dataKey="despesas" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" fill="transparent" />
