@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, MoreHorizontal, User, Mail, CreditCard, Calendar, Tag, ExternalLink, LayoutGrid, List } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, User, Mail, CreditCard, Calendar, Tag, ExternalLink, LayoutGrid, List, Loader2 } from "lucide-react";
+import { useTransactions } from "@/hooks/useTransactions";
 import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -28,9 +29,16 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function SalesView() {
+    const { data, loading, create } = useTransactions("RECEITA");
     const [isNewSaleOpen, setIsNewSaleOpen] = useState(false);
     const [selectedSale, setSelectedSale] = useState<Transaction | null>(null);
     const [search, setSearch] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    // Controlled form state
+    const [form, setForm] = useState({
+        nome: "", email: "", produto: "", valor: "", origem: "MANUAL" as string, data: new Date().toISOString().slice(0, 10)
+    });
 
     const columns: any[] = [
         { header: "Data", accessor: (item: Transaction) => formatDate(item.data) },
@@ -86,70 +94,7 @@ export function SalesView() {
         },
     ];
 
-    // Mock data
-    const data: Transaction[] = [
-        {
-            id: "1",
-            data: "2026-03-03",
-            tipo: "RECEITA",
-            status: "APROVADO",
-            valor: 1497.00,
-            categoria: "Venda",
-            subcategoria: "Produto 1",
-            origem: "KIWIFY",
-            produto: "Mentoria Squad",
-            nome: "Nicolas Moreira",
-            email: "nicolas@exemplo.com",
-            responsavel: "Time Vendas",
-            descricao: "Venda direta via checkout"
-        },
-        {
-            id: "2",
-            data: "2026-03-01",
-            tipo: "RECEITA",
-            status: "PENDENTE",
-            valor: 497.00,
-            categoria: "Venda",
-            subcategoria: "E-book",
-            origem: "HOTMART",
-            produto: "Closing Kit",
-            nome: "Maria Silva",
-            email: "maria@exemplo.com",
-            responsavel: "Time Vendas",
-            descricao: "Aguardando boleto"
-        },
-        {
-            id: "3",
-            data: "2026-02-28",
-            tipo: "RECEITA",
-            status: "APROVADO",
-            valor: 2997.00,
-            categoria: "Venda",
-            subcategoria: "High Ticket",
-            origem: "MANUAL",
-            produto: "Consultoria Premium",
-            nome: "João Pedro",
-            email: "jp@empresa.com",
-            responsavel: "Nicolas Moreira",
-            descricao: "Fechamento consultoria anual"
-        },
-        {
-            id: "4",
-            data: "2026-02-26",
-            tipo: "RECEITA",
-            status: "CANCELADO",
-            valor: 997.00,
-            categoria: "Venda",
-            subcategoria: "Curso",
-            origem: "STRIPE",
-            produto: "Workshop Ads",
-            nome: "Ana Lima",
-            email: "ana@exemplo.com",
-            responsavel: "Maria Silva",
-            descricao: "Chargeback solicitado"
-        }
-    ];
-
+    // Filters applied to real data
     const [statusFilter, setStatusFilter] = useState<string>("ALL");
     const [originFilter, setOriginFilter] = useState<string>("ALL");
 
@@ -198,7 +143,9 @@ export function SalesView() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                 <div>
                     <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Vendas</h1>
-                    <p className="text-muted-foreground mt-2 text-sm font-medium">Acompanhamento em tempo real de suas conversões.</p>
+                    <p className="text-muted-foreground mt-2 text-sm font-medium">
+                        {loading ? "Carregando..." : `${data.length} registros · Supabase`}
+                    </p>
                 </div>
                 <Button
                     onClick={() => setIsNewSaleOpen(true)}
@@ -315,24 +262,24 @@ export function SalesView() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 pointer-events-auto">
                         <div className="space-y-2">
-                            <Label htmlFor="nome" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Nome do Cliente</Label>
-                            <Input id="nome" placeholder="John Doe" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Nome do Cliente</Label>
+                            <Input value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} placeholder="John Doe" className="h-12 rounded-xl bg-muted/30 border-border/40" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">E-mail</Label>
-                            <Input id="email" type="email" placeholder="john@example.com" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">E-mail</Label>
+                            <Input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} type="email" placeholder="john@example.com" className="h-12 rounded-xl bg-muted/30 border-border/40" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="produto" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Produto</Label>
-                            <Input id="produto" placeholder="Nome do Treinamento" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Produto</Label>
+                            <Input value={form.produto} onChange={e => setForm(f => ({ ...f, produto: e.target.value }))} placeholder="Nome do Treinamento" className="h-12 rounded-xl bg-muted/30 border-border/40" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="valor" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Valor (R$)</Label>
-                            <Input id="valor" type="number" step="0.01" placeholder="0,00" className="h-12 rounded-xl bg-muted/30 border-border/40 font-mono" />
+                            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Valor (R$)</Label>
+                            <Input value={form.valor} onChange={e => setForm(f => ({ ...f, valor: e.target.value }))} type="number" step="0.01" placeholder="0,00" className="h-12 rounded-xl bg-muted/30 border-border/40 font-mono" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="origem" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Origem da Venda</Label>
-                            <Select>
+                            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Origem da Venda</Label>
+                            <Select value={form.origem} onValueChange={v => setForm(f => ({ ...f, origem: v }))}>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40">
                                     <SelectValue placeholder="Selecione a origem" />
                                 </SelectTrigger>
@@ -345,22 +292,45 @@ export function SalesView() {
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="data" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Data</Label>
-                            <Input id="data" type="date" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Data</Label>
+                            <Input value={form.data} onChange={e => setForm(f => ({ ...f, data: e.target.value }))} type="date" className="h-12 rounded-xl bg-muted/30 border-border/40" />
                         </div>
                     </div>
 
                     <DialogFooter className="gap-3">
-                        <Button variant="ghost" onClick={() => setIsNewSaleOpen(false)} className="rounded-xl font-bold h-12">
+                        <Button variant="ghost" onClick={() => setIsNewSaleOpen(false)} className="rounded-xl font-bold h-12" disabled={saving}>
                             Cancelar
                         </Button>
                         <Button
                             className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20"
-                            onClick={() => {
-                                toast.success("Venda enviada para processamento com sucesso!");
-                                setIsNewSaleOpen(false);
+                            disabled={saving || !form.nome || !form.valor}
+                            onClick={async () => {
+                                setSaving(true);
+                                try {
+                                    await create({
+                                        tipo: "RECEITA",
+                                        status: "PENDENTE",
+                                        data: form.data,
+                                        valor: parseFloat(form.valor),
+                                        nome: form.nome,
+                                        email: form.email,
+                                        produto: form.produto,
+                                        origem: form.origem as Transaction["origem"],
+                                        categoria: "Venda",
+                                        responsavel: "Manual",
+                                        descricao: `Venda de ${form.produto}`,
+                                    });
+                                    toast.success("Venda registrada com sucesso!");
+                                    setIsNewSaleOpen(false);
+                                    setForm({ nome: "", email: "", produto: "", valor: "", origem: "MANUAL", data: new Date().toISOString().slice(0, 10) });
+                                } catch (e) {
+                                    toast.error("Erro ao salvar venda.");
+                                } finally {
+                                    setSaving(false);
+                                }
                             }}
                         >
+                            {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : null}
                             Confirmar Registro
                         </Button>
                     </DialogFooter>

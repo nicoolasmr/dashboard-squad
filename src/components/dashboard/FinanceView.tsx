@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal, TrendingUp, X, LayoutGrid, List } from "lucide-react";
+import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal, TrendingUp, X, LayoutGrid, List, Loader2 } from "lucide-react";
+import { useTransactions } from "@/hooks/useTransactions";
 import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -35,9 +36,16 @@ import { toast } from "sonner";
 
 export function FinanceView() {
     const [activeSubTab, setActiveSubTab] = useState<'DESPESA' | 'CUSTO'>('DESPESA');
+    const { data: allData, loading, create } = useTransactions();
     const [isNewRecordOpen, setIsNewRecordOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<Transaction | null>(null);
     const [search, setSearch] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState({
+        descricao: "", categoria: "", valor: "", responsavel: "",
+        data: new Date().toISOString().slice(0, 10), status: "PREVISTO" as string,
+        recorrencia: "PONTUAL" as string, parcelas: "1"
+    });
 
     const columns: any[] = [
         { header: "Data", accessor: (item: Transaction) => formatDate(item.data) },
@@ -99,53 +107,8 @@ export function FinanceView() {
         },
     ];
 
-    // Mock data based on tab
-    const expenses: Transaction[] = [
-        {
-            id: "3",
-            data: "2026-03-01",
-            tipo: 'DESPESA',
-            status: "PAGO",
-            valor: 2450.00,
-            categoria: "TI",
-            subcategoria: "Hospedagem",
-            origem: "MANUAL",
-            responsavel: "TI",
-            descricao: "AWS Mensal",
-            recorrencia: 'RECORRENTE',
-            parcelas: 12,
-            recorrencia_periodo: 'MENSAL'
-        },
-        {
-            id: "5",
-            data: "2026-03-05",
-            tipo: 'DESPESA',
-            status: "PREVISTO",
-            valor: 850.00,
-            categoria: "Marketing",
-            subcategoria: "Ads",
-            origem: "MANUAL",
-            responsavel: "Marketing",
-            descricao: "Recarga Facebook Ads"
-        }
-    ];
-
-    const costs: Transaction[] = [
-        {
-            id: "4",
-            data: "2026-03-10",
-            tipo: 'CUSTO',
-            status: "PREVISTO",
-            valor: 12000.00,
-            categoria: "Operação",
-            subcategoria: "Folha",
-            origem: "PLANILHA",
-            responsavel: "Financeiro",
-            descricao: "Salários Squad"
-        }
-    ];
-
-    const currentData = activeSubTab === 'DESPESA' ? expenses : costs;
+    // Filter real data by active tab
+    const currentData = allData.filter(item => item.tipo === activeSubTab);
 
     const [statusFilter, setStatusFilter] = useState<string>("ALL");
     const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
@@ -178,7 +141,7 @@ export function FinanceView() {
 
         return {
             id: f.id,
-            name: f.descricao,
+            name: f.descricao ?? f.categoria ?? 'Lançamento',
             start: dueDate.getTime(),
             duration: duration,
             color: colors[f.status] || '#3b82f6',

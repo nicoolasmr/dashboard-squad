@@ -32,14 +32,14 @@ export interface Transaction {
     status: TransactionStatus;
     valor: number;
     categoria: string;
-    subcategoria: string;
-    origem: OriginType;
+    subcategoria?: string;
+    origem?: OriginType;
     produto?: string;
     nome?: string;
     email?: string;
     telefone?: string;
     responsavel: string;
-    descricao: string;
+    descricao?: string;
     recorrencia?: 'PONTUAL' | 'RECORRENTE';
     parcelas?: number;
     recorrencia_periodo?: string;

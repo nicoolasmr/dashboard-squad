@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, Calendar, Clock, Video, User, CheckCircle2, XCircle, RotateCcw, MoreHorizontal, MapPin, MessageSquare, LayoutGrid, List } from "lucide-react";
+import { Plus, Search, Filter, Calendar, Clock, Video, User, CheckCircle2, XCircle, RotateCcw, MoreHorizontal, MapPin, MessageSquare, LayoutGrid, List, Loader2 } from "lucide-react";
+import { useMeetings } from "@/hooks/useMeetings";
 import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -30,9 +31,15 @@ import { formatDateTime, cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function MeetingsView() {
+    const { data, loading, create } = useMeetings();
     const [isNewMeetingOpen, setIsNewMeetingOpen] = useState(false);
     const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
     const [search, setSearch] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState({
+        titulo: "", cliente: "", owner: "",
+        data_hora: "", canal: "ZOOM", notas: ""
+    });
 
     const columns: any[] = [
         {
@@ -98,50 +105,7 @@ export function MeetingsView() {
         },
     ];
 
-    // Mock data
-    const data: Meeting[] = [
-        {
-            id: "m1",
-            data_hora: "2026-03-03T10:00",
-            titulo: "Board Review Q1",
-            cliente: "Squad Corp",
-            owner: "Nicolas Moreira",
-            status: "FEITA",
-            canal: "MEET",
-            notas: "Foco em metas de expansão."
-        },
-        {
-            id: "m2",
-            data_hora: "2026-03-03T14:30",
-            titulo: "Briefing Projeto X",
-            cliente: "Tech Solutions",
-            owner: "Maria Silva",
-            status: "MARCADA",
-            canal: "ZOOM",
-            notas: "Trazer orçamento detalhado."
-        },
-        {
-            id: "m3",
-            data_hora: "2026-03-04T09:00",
-            titulo: "Daily Standup",
-            cliente: "Internal",
-            owner: "Nicolas Moreira",
-            status: "MARCADA",
-            canal: "CALL",
-            notas: ""
-        },
-        {
-            id: "m4",
-            data_hora: "2026-03-04T16:00",
-            titulo: "Customer Success Check-in",
-            cliente: "Global Partners",
-            owner: "Maria Silva",
-            status: "REMARCADA",
-            canal: "MEET",
-            notas: "Solicitaram antecipação."
-        }
-    ];
-
+    // Real data from Supabase
     const [statusFilter, setStatusFilter] = useState<string>("ALL");
     const [channelFilter, setChannelFilter] = useState<string>("ALL");
 
