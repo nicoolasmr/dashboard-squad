@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal } from "lucide-react";
+import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal, TrendingUp, X } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -98,39 +98,69 @@ export function FinanceView() {
         },
     ];
 
-    // Mock data
-    const data: Transaction[] = [
+    // Mock data based on tab
+    const expenses: Transaction[] = [
         {
             id: "3",
             data: "2026-03-01",
-            tipo: activeSubTab,
+            tipo: 'DESPESA',
             status: "PAGO",
             valor: 2450.00,
-            categoria: "Infraestrutura",
+            categoria: "TI",
             subcategoria: "Hospedagem",
             origem: "MANUAL",
             responsavel: "TI",
-            descricao: "Pagamento AWS mensal"
+            descricao: "AWS Mensal",
+            recorrencia: 'RECORRENTE',
+            parcelas: 12,
+            recorrencia_periodo: 'MENSAL'
         },
+        {
+            id: "5",
+            data: "2026-03-05",
+            tipo: 'DESPESA',
+            status: "PREVISTO",
+            valor: 850.00,
+            categoria: "Marketing",
+            subcategoria: "Ads",
+            origem: "MANUAL",
+            responsavel: "Marketing",
+            descricao: "Recarga Facebook Ads"
+        }
+    ];
+
+    const costs: Transaction[] = [
         {
             id: "4",
             data: "2026-03-10",
-            tipo: activeSubTab,
+            tipo: 'CUSTO',
             status: "PREVISTO",
             valor: 12000.00,
             categoria: "Operação",
             subcategoria: "Folha",
             origem: "PLANILHA",
             responsavel: "Financeiro",
-            descricao: "Provisão Salários Squad"
+            descricao: "Salários Squad"
         }
     ];
 
-    const filteredData = data.filter(item =>
-        item.descricao.toLowerCase().includes(search.toLowerCase()) ||
-        item.categoria.toLowerCase().includes(search.toLowerCase()) ||
-        item.responsavel.toLowerCase().includes(search.toLowerCase())
-    );
+    const currentData = activeSubTab === 'DESPESA' ? expenses : costs;
+
+    const [statusFilter, setStatusFilter] = useState<string>("ALL");
+    const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+
+    const filteredData = currentData.filter(item => {
+        const matchesSearch = (item.descricao?.toLowerCase() || "").includes(search.toLowerCase()) ||
+            (item.categoria?.toLowerCase() || "").includes(search.toLowerCase()) ||
+            (item.responsavel?.toLowerCase() || "").includes(search.toLowerCase());
+
+        const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
+        const matchesCategory = categoryFilter === "ALL" || item.categoria === categoryFilter;
+
+        return matchesSearch && matchesStatus && matchesCategory;
+    });
+
+    const [isEditing, setIsEditing] = useState(false);
 
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-3 duration-700">
@@ -170,7 +200,7 @@ export function FinanceView() {
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Total Previsto</p>
-                            <p className="text-2xl font-bold text-foreground">{formatCurrency(12000)}</p>
+                            <p className="text-2xl font-bold text-foreground">{formatCurrency(activeSubTab === 'DESPESA' ? 3300 : 12000)}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -181,7 +211,7 @@ export function FinanceView() {
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-primary/70 uppercase tracking-[0.1em] mb-1">Balanço do Mês</p>
-                            <p className="text-2xl font-bold text-primary">{formatCurrency(-14450)}</p>
+                            <p className="text-2xl font-bold text-primary">{formatCurrency(activeSubTab === 'DESPESA' ? -5750 : -14450)}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -207,9 +237,47 @@ export function FinanceView() {
                                 className="h-12 pl-12 bg-muted/30 border-border/50 rounded-xl"
                             />
                         </div>
-                        <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-border/60">
-                            <Filter size={18} />
-                        </Button>
+                        <div className="flex gap-4">
+                            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <SelectTrigger className="h-12 w-[140px] rounded-xl border-border/60 bg-muted/20 font-bold text-[10px] uppercase tracking-wider">
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">Todos Status</SelectItem>
+                                    <SelectItem value="PAGO">Pago</SelectItem>
+                                    <SelectItem value="PREVISTO">Previsto</SelectItem>
+                                    <SelectItem value="ATRASADO">Atrasado</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                                <SelectTrigger className="h-12 w-[150px] rounded-xl border-border/60 bg-muted/20 font-bold text-[10px] uppercase tracking-wider">
+                                    <SelectValue placeholder="Categoria" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">Todas Categorias</SelectItem>
+                                    <SelectItem value="Software">Software</SelectItem>
+                                    <SelectItem value="Marketing">Marketing</SelectItem>
+                                    <SelectItem value="Equipe">Equipe</SelectItem>
+                                    <SelectItem value="Operação">Operação</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Button
+                                variant="outline"
+                                className="h-12 px-5 rounded-xl border-border/60 hover:bg-muted font-bold text-xs"
+                                onClick={() => {
+                                    setStatusFilter("ALL");
+                                    setCategoryFilter("ALL");
+                                    setSearch("");
+                                    toast.success("Filtros limpos!");
+                                }}
+                                title="Limpar Filtros"
+                            >
+                                <Filter size={16} className="mr-2" />
+                                Limpar
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -221,7 +289,7 @@ export function FinanceView() {
                 />
             </div>
 
-            {/* New Record Modal */}
+            {/* Registration Modal */}
             <Dialog open={isNewRecordOpen} onOpenChange={setIsNewRecordOpen}>
                 <DialogContent className="max-w-2xl rounded-[2.5rem] border-border/60 p-8">
                     <DialogHeader>
@@ -255,12 +323,20 @@ export function FinanceView() {
                             <Input id="val" type="number" step="0.01" placeholder="0,00" className="h-12 rounded-xl bg-muted/30 border-border/40 font-mono" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="date" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Data</Label>
-                            <Input id="date" type="date" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Label htmlFor="rec" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Recorrência</Label>
+                            <Select defaultValue="PONTUAL">
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="PONTUAL">Pontual</SelectItem>
+                                    <SelectItem value="RECORRENTE">Recorrente</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="resp" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Responsável</Label>
-                            <Input id="resp" placeholder="Nome ou Setor" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Label htmlFor="parc" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Nº de Repetições</Label>
+                            <Input id="parc" type="number" placeholder="1" className="h-12 rounded-xl bg-muted/30 border-border/40" />
                         </div>
                     </div>
 
@@ -270,9 +346,9 @@ export function FinanceView() {
                         </Button>
                         <Button
                             variant="destructive"
-                            className="rounded-xl font-bold h-12 px-8"
+                            className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-error/20"
                             onClick={() => {
-                                toast.success("Lançamento agendado no n8n!");
+                                toast.success("Lançamento registrado com sucesso!");
                                 setIsNewRecordOpen(false);
                             }}
                         >
@@ -282,9 +358,14 @@ export function FinanceView() {
                 </DialogContent>
             </Dialog>
 
-            {/* Details Modal */}
-            <Dialog open={!!selectedRecord} onOpenChange={(open) => !open && setSelectedRecord(null)}>
-                <DialogContent className="max-w-xl rounded-[2.5rem] border-border/60 p-0 overflow-hidden">
+            {/* Details & Edit Modal */}
+            <Dialog open={!!selectedRecord} onOpenChange={(open) => {
+                if (!open) {
+                    setSelectedRecord(null);
+                    setIsEditing(false);
+                }
+            }}>
+                <DialogContent className="max-w-xl rounded-[2.5rem] border-border/60 p-0 overflow-hidden shadow-2xl">
                     {selectedRecord && (
                         <>
                             <div className="bg-error/5 p-8 pb-12 relative border-b border-error/10">
@@ -296,7 +377,14 @@ export function FinanceView() {
                                 <div className="w-16 h-16 bg-error rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-error/20">
                                     <Receipt size={32} />
                                 </div>
-                                <h2 className="text-2xl font-bold text-foreground leading-tight italic">"{selectedRecord.descricao}"</h2>
+                                {isEditing ? (
+                                    <Input
+                                        defaultValue={selectedRecord.descricao}
+                                        className="text-2xl font-bold bg-transparent border-none focus-visible:ring-offset-0 focus-visible:ring-1 italic p-0"
+                                    />
+                                ) : (
+                                    <h2 className="text-2xl font-bold text-foreground leading-tight italic">"{selectedRecord.descricao}"</h2>
+                                )}
                                 <p className="text-muted-foreground font-medium mt-2 flex items-center gap-2 uppercase text-[10px] tracking-widest">
                                     <Wallet size={14} /> Transação ID: {selectedRecord.id}
                                 </p>
@@ -306,46 +394,115 @@ export function FinanceView() {
                                 <div className="grid grid-cols-2 gap-8">
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1.5 line-clamp-1">
-                                            <Tag size={12} className="inline mr-1" /> Categoria Principal
+                                            <Tag size={12} className="inline mr-1" /> Categoria
                                         </p>
-                                        <p className="font-bold text-lg">{selectedRecord.categoria}</p>
-                                        <p className="text-xs text-muted-foreground italic">{selectedRecord.subcategoria}</p>
+                                        {isEditing ? (
+                                            <Select defaultValue={selectedRecord.categoria}>
+                                                <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-none font-bold">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="TI">TI</SelectItem>
+                                                    <SelectItem value="Marketing">Marketing</SelectItem>
+                                                    <SelectItem value="Operação">Operação</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        ) : (
+                                            <>
+                                                <p className="font-bold text-lg">{selectedRecord.categoria}</p>
+                                                <p className="text-xs text-muted-foreground italic">{selectedRecord.subcategoria}</p>
+                                            </>
+                                        )}
                                     </div>
                                     <div className="space-y-1 text-right">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1.5 justify-end flex items-center">
-                                            <Wallet size={12} className="inline mr-1" /> Valor do Gasto
+                                            <Wallet size={12} className="inline mr-1" /> Valor Total
                                         </p>
-                                        <p className="font-bold text-3xl text-error">{formatCurrency(selectedRecord.valor)}</p>
+                                        {isEditing ? (
+                                            <Input
+                                                type="number"
+                                                defaultValue={selectedRecord.valor}
+                                                className="text-right font-bold text-2xl text-error bg-transparent border-none p-0 h-auto"
+                                            />
+                                        ) : (
+                                            <p className="font-bold text-3xl text-error">{formatCurrency(selectedRecord.valor)}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1.5">
-                                            <Calendar size={12} className="inline mr-1" /> Data do Lançamento
+                                            <Calendar size={12} className="inline mr-1" /> {isEditing ? "Alterar Data" : "Data do Lançamento"}
                                         </p>
-                                        <p className="font-medium">{formatDate(selectedRecord.data)}</p>
+                                        {isEditing ? (
+                                            <Input type="date" defaultValue={selectedRecord.data} className="h-10 rounded-xl bg-muted/40 border-none" />
+                                        ) : (
+                                            <p className="font-medium">{formatDate(selectedRecord.data)}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-1 text-right">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1.5 justify-end flex items-center">
-                                            <User size={12} className="inline mr-1" /> Autorizado por
+                                            <TrendingUp size={12} className="inline mr-1" /> Recorrência
                                         </p>
-                                        <p className="font-medium text-foreground">{selectedRecord.responsavel}</p>
+                                        {isEditing ? (
+                                            <Select defaultValue={selectedRecord.recorrencia || "PONTUAL"}>
+                                                <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-none font-bold">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="PONTUAL">Pontual</SelectItem>
+                                                    <SelectItem value="RECORRENTE">Recorrente</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        ) : (
+                                            <p className="font-medium text-foreground">
+                                                {selectedRecord.recorrencia === 'RECORRENTE' ? `${selectedRecord.parcelas}x ${selectedRecord.recorrencia_periodo}` : "Pontual"}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
                                 <div className="flex gap-4 pt-4">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1 h-12 rounded-xl font-bold border-border/60"
-                                        onClick={() => toast.success("Recibo gerado com sucesso!")}
-                                    >
-                                        Gerar Recibo
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        className="flex-1 h-12 rounded-xl font-bold px-8"
-                                        onClick={() => toast.warning("Solicitação de estorno enviada ao n8n.")}
-                                    >
-                                        Estornar Gasto
-                                    </Button>
+                                    {isEditing ? (
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                className="flex-1 h-12 rounded-xl font-bold"
+                                                onClick={() => setIsEditing(false)}
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                className="flex-1 h-12 rounded-xl font-bold px-8 shadow-lg shadow-error/20"
+                                                onClick={() => {
+                                                    toast.success("Alterações salvas com sucesso!");
+                                                    setIsEditing(false);
+                                                }}
+                                            >
+                                                Salvar Alterações
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Button
+                                                variant="outline"
+                                                className="flex-1 h-12 rounded-xl font-bold border-border/60"
+                                                onClick={() => setIsEditing(true)}
+                                            >
+                                                Editar Dados
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                className="w-12 h-12 rounded-xl font-bold p-0 flex items-center justify-center border-border/60"
+                                                onClick={() => {
+                                                    toast.error("Gasto excluído permanentemente.");
+                                                    setSelectedRecord(null);
+                                                }}
+                                                title="Excluir Gasto"
+                                            >
+                                                <X size={20} />
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </>

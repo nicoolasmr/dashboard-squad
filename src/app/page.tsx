@@ -95,7 +95,7 @@ function DashboardContent() {
   const showZeroState = !isSimulationMode && hasNoData && !loading;
 
   return (
-    <main className="min-h-screen bg-[#fafafa] dark:bg-[#080808] transition-colors duration-500 pt-20 lg:pl-72">
+    <main className="min-h-screen bg-background transition-colors duration-500 pt-20 lg:pl-72">
       <Navbar
         activeTab={activeTab}
         onRefresh={fetchData}

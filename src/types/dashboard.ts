@@ -40,6 +40,9 @@ export interface Transaction {
     telefone?: string;
     responsavel: string;
     descricao: string;
+    recorrencia?: 'PONTUAL' | 'RECORRENTE';
+    parcelas?: number;
+    recorrencia_periodo?: string;
 }
 
 export interface Meeting {

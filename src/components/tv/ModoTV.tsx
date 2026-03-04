@@ -51,18 +51,22 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                         </h1>
                         <div className="flex gap-6 mt-3">
                             {views.map((v, i) => (
-                                <div key={v} className="flex flex-col gap-1">
+                                <button
+                                    key={v}
+                                    onClick={() => setActiveView(i)}
+                                    className="flex flex-col gap-1 text-left outline-none group"
+                                >
                                     <span className={cn(
                                         "text-[10px] font-black tracking-[0.2em] transition-all duration-700",
-                                        activeView === i ? "text-primary opacity-100" : "text-white opacity-20"
+                                        activeView === i ? "text-primary opacity-100" : "text-white opacity-20 group-hover:opacity-50"
                                     )}>
                                         {v}
                                     </span>
                                     <div className={cn(
                                         "h-0.5 rounded-full transition-all duration-700",
-                                        activeView === i ? "bg-primary w-full" : "bg-white/10 w-4"
+                                        activeView === i ? "bg-primary w-full" : "bg-white/10 w-4 group-hover:w-8"
                                     )} />
-                                </div>
+                                </button>
                             ))}
                         </div>
                     </div>
@@ -119,7 +123,7 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                                             <div className="w-8 h-8 rounded-full bg-primary relative" />
                                             Total Approved Revenue
                                         </p>
-                                        <h2 className="text-[clamp(4rem,10vw,12rem)] font-black tracking-[-0.06em] leading-none mb-10 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 truncate">
+                                        <h2 className="text-[clamp(3.5rem,8vw,14rem)] font-black tracking-[-0.06em] leading-none mb-10 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 whitespace-nowrap overflow-visible">
                                             {formatCurrency(kpis?.receita_aprovada || 0).split(',')[0]}
                                             <span className="text-[0.4em] text-white/20">,{formatCurrency(kpis?.receita_aprovada || 0).split(',')[1]}</span>
                                         </h2>

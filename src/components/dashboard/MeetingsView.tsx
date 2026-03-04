@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Calendar, Clock, Video, User, CheckCircle2, XCircle, RotateCcw, MoreHorizontal, MapPin, MessageSquare } from "lucide-react";
+import { Plus, Search, Filter, Calendar, Clock, Video, User, CheckCircle2, XCircle, RotateCcw, MoreHorizontal, MapPin, MessageSquare } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -121,11 +121,21 @@ export function MeetingsView() {
         }
     ];
 
-    const filteredData = data.filter(item =>
-        item.titulo.toLowerCase().includes(search.toLowerCase()) ||
-        item.cliente.toLowerCase().includes(search.toLowerCase()) ||
-        item.owner.toLowerCase().includes(search.toLowerCase())
-    );
+    const [statusFilter, setStatusFilter] = useState<string>("ALL");
+    const [channelFilter, setChannelFilter] = useState<string>("ALL");
+
+    const filteredData = data.filter(item => {
+        const matchesSearch = item.titulo.toLowerCase().includes(search.toLowerCase()) ||
+            item.cliente.toLowerCase().includes(search.toLowerCase()) ||
+            item.owner.toLowerCase().includes(search.toLowerCase());
+
+        const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
+        const matchesChannel = channelFilter === "ALL" || item.canal === channelFilter;
+
+        return matchesSearch && matchesStatus && matchesChannel;
+    });
+
+    const [isEditing, setIsEditing] = useState(false);
 
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -182,7 +192,7 @@ export function MeetingsView() {
 
             {/* Table section */}
             <div className="bg-card/50 backdrop-blur-sm p-8 rounded-[3rem] border border-border/60 shadow-premium flex flex-col gap-8">
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col lg:flex-row gap-4">
                     <div className="relative flex-grow">
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={20} />
                         <Input
@@ -191,6 +201,32 @@ export function MeetingsView() {
                             onChange={(e) => setSearch(e.target.value)}
                             className="h-14 pl-14 bg-muted/30 border-border/40 rounded-2xl focus-visible:ring-success/20 focus-visible:border-success transition-all text-base"
                         />
+                    </div>
+
+                    <div className="flex gap-4">
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="h-14 w-[160px] rounded-2xl border-border/60 bg-muted/30 font-bold text-xs uppercase tracking-wider">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Todos Status</SelectItem>
+                                <SelectItem value="FEITA">Concluída</SelectItem>
+                                <SelectItem value="MARCADA">Agendada</SelectItem>
+                                <SelectItem value="CANCELADA">Cancelada</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={channelFilter} onValueChange={setChannelFilter}>
+                            <SelectTrigger className="h-14 w-[160px] rounded-2xl border-border/60 bg-muted/30 font-bold text-xs uppercase tracking-wider">
+                                <SelectValue placeholder="Canal" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Todos Canais</SelectItem>
+                                <SelectItem value="ZOOM">Zoom</SelectItem>
+                                <SelectItem value="MEET">Google Meet</SelectItem>
+                                <SelectItem value="PRES">Presencial</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
@@ -214,7 +250,7 @@ export function MeetingsView() {
 
                     <form className="flex flex-col gap-6 my-8" onSubmit={(e) => {
                         e.preventDefault();
-                        toast.success("Evento sincronizado com n8n e Calendário!");
+                        toast.success("Evento sincronizado com o dashboard!");
                         setIsNewMeetingOpen(false);
                     }}>
                         <div className="space-y-2">
@@ -269,7 +305,7 @@ export function MeetingsView() {
                         </div>
 
                         <DialogFooter className="mt-4 gap-3">
-                            <Button variant="ghost" type="button" onClick={() => setIsNewMeetingOpen(false)} className="rounded-xl font-bold h-12 h-12">
+                            <Button variant="ghost" type="button" onClick={() => setIsNewMeetingOpen(false)} className="rounded-xl font-bold h-12">
                                 Cancelar
                             </Button>
                             <Button type="submit" className="rounded-xl font-bold h-12 px-10 bg-success hover:bg-success/90">
@@ -280,8 +316,13 @@ export function MeetingsView() {
                 </DialogContent>
             </Dialog>
 
-            {/* Details Modal */}
-            <Dialog open={!!selectedMeeting} onOpenChange={(open) => !open && setSelectedMeeting(null)}>
+            {/* Meeting Details & Edit Modal */}
+            <Dialog open={!!selectedMeeting} onOpenChange={(open) => {
+                if (!open) {
+                    setSelectedMeeting(null);
+                    setIsEditing(false);
+                }
+            }}>
                 <DialogContent className="max-w-xl rounded-[3rem] border-border/60 p-0 overflow-hidden shadow-2xl">
                     {selectedMeeting && (
                         <>
@@ -294,7 +335,14 @@ export function MeetingsView() {
                                 <div className="w-16 h-16 bg-primary/10 text-primary rounded-[1.5rem] flex items-center justify-center mb-8">
                                     {selectedMeeting.canal === 'ZOOM' || selectedMeeting.canal === 'MEET' ? <Video size={36} /> : <User size={36} />}
                                 </div>
-                                <h2 className="text-3xl font-bold text-foreground leading-[1.1] mb-2">{selectedMeeting.titulo}</h2>
+                                {isEditing ? (
+                                    <Input
+                                        defaultValue={selectedMeeting.titulo}
+                                        className="text-3xl font-bold bg-transparent border-none focus-visible:ring-offset-0 focus-visible:ring-1 p-0 h-auto"
+                                    />
+                                ) : (
+                                    <h2 className="text-3xl font-bold text-foreground leading-[1.1] mb-2">{selectedMeeting.titulo}</h2>
+                                )}
                                 <p className="text-muted-foreground font-semibold flex items-center gap-2 italic">
                                     com <span className="text-foreground not-italic">{selectedMeeting.cliente}</span>
                                 </p>
@@ -303,26 +351,34 @@ export function MeetingsView() {
                             <div className="p-10 bg-card relative z-10 space-y-10 rounded-t-[2.5rem] -mt-6 shadow-2xl">
                                 <div className="grid grid-cols-2 gap-10">
                                     <div className="space-y-1.5">
-                                        <p className="text-[10px] uppercase font-heavy text-muted-foreground tracking-[0.15em] flex items-center gap-2">
-                                            <Calendar size={12} className="text-primary" /> Data e Horário
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.15em] flex items-center gap-2">
+                                            <Calendar size={12} className="text-primary" /> {isEditing ? "Nova Data" : "Data e Horário"}
                                         </p>
-                                        <p className="font-bold text-lg">{formatDateTime(selectedMeeting.data_hora)}</p>
+                                        {isEditing ? (
+                                            <Input type="datetime-local" defaultValue={selectedMeeting.data_hora} className="h-10 rounded-xl bg-muted/40 border-none font-bold" />
+                                        ) : (
+                                            <p className="font-bold text-lg">{formatDateTime(selectedMeeting.data_hora)}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-1.5 text-right">
-                                        <p className="text-[10px] uppercase font-heavy text-muted-foreground tracking-[0.15em] flex items-center gap-2 justify-end">
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.15em] flex items-center gap-2 justify-end">
                                             <Video size={12} className="text-primary" /> Plataforma
                                         </p>
                                         <p className="font-bold text-lg">{selectedMeeting.canal}</p>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <p className="text-[10px] uppercase font-heavy text-muted-foreground tracking-[0.15em] flex items-center gap-2">
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.15em] flex items-center gap-2">
                                             <User size={12} className="text-primary" /> Gestor Responsável
                                         </p>
-                                        <p className="font-bold text-lg">{selectedMeeting.owner}</p>
+                                        {isEditing ? (
+                                            <Input defaultValue={selectedMeeting.owner} className="h-10 rounded-xl bg-muted/40 border-none font-bold" />
+                                        ) : (
+                                            <p className="font-bold text-lg">{selectedMeeting.owner}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-1.5 text-right">
-                                        <p className="text-[10px] uppercase font-heavy text-muted-foreground tracking-[0.15em] flex items-center gap-2 justify-end">
-                                            <MessageSquare size={12} className="text-primary" /> Notas
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.15em] flex items-center gap-2 justify-end">
+                                            <MessageSquare size={12} className="text-primary" /> Notas Rápidas
                                         </p>
                                         <p className="text-sm font-medium text-muted-foreground line-clamp-1">Presente no briefing</p>
                                     </div>
@@ -330,30 +386,57 @@ export function MeetingsView() {
 
                                 {selectedMeeting.notas && (
                                     <div className="pt-8 border-t border-border/40">
-                                        <p className="text-[10px] uppercase font-heavy text-muted-foreground tracking-[0.2em] mb-4">Briefing & Contexto</p>
-                                        <div className="bg-muted/30 p-6 rounded-[1.5rem] border border-border/30 text-sm font-medium text-foreground/80 leading-relaxed italic">
-                                            "{selectedMeeting.notas}"
-                                        </div>
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.2em] mb-4">Briefing & Contexto</p>
+                                        {isEditing ? (
+                                            <Textarea defaultValue={selectedMeeting.notas} className="rounded-xl bg-muted/30 border-border/40" rows={3} />
+                                        ) : (
+                                            <div className="bg-muted/30 p-6 rounded-[1.5rem] border border-border/30 text-sm font-medium text-foreground/80 leading-relaxed italic">
+                                                "{selectedMeeting.notas}"
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
                                 <div className="flex gap-4 pt-4">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1 h-14 rounded-2xl font-bold border-border/60 hover:bg-muted/50"
-                                        onClick={() => toast.info("Remarcação de agenda aberta no Calendário.")}
-                                    >
-                                        Remarcar Agenda
-                                    </Button>
-                                    <Button
-                                        className="flex-1 h-14 rounded-2xl font-bold bg-success hover:bg-success/90 shadow-lg shadow-success/20"
-                                        onClick={() => {
-                                            toast.success("Reunião marcada como concluída!");
-                                            setSelectedMeeting(null);
-                                        }}
-                                    >
-                                        Concluir Reunião
-                                    </Button>
+                                    {isEditing ? (
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                className="flex-1 h-14 rounded-2xl font-bold"
+                                                onClick={() => setIsEditing(false)}
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                className="flex-1 h-14 rounded-2xl font-bold bg-success hover:bg-success/90 shadow-lg shadow-success/20"
+                                                onClick={() => {
+                                                    toast.success("Reunião atualizada com sucesso!");
+                                                    setIsEditing(false);
+                                                }}
+                                            >
+                                                Salvar Alterações
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Button
+                                                variant="outline"
+                                                className="flex-1 h-14 rounded-2xl font-bold border-border/60 hover:bg-muted/50"
+                                                onClick={() => setIsEditing(true)}
+                                            >
+                                                Editar Reunião
+                                            </Button>
+                                            <Button
+                                                className="flex-1 h-14 rounded-2xl font-bold bg-success hover:bg-success/90 shadow-lg shadow-success/20 border-none"
+                                                onClick={() => {
+                                                    toast.success("Reunião marcada como concluída!");
+                                                    setSelectedMeeting(null);
+                                                }}
+                                            >
+                                                Concluir Reunião
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </>

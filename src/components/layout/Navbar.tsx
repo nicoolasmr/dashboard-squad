@@ -43,13 +43,7 @@ export function Navbar({ onRefresh, onNewSale, onNewExpense, onNewMeeting, onSet
     };
 
     const toggleTVMode = () => {
-        const url = new URL(window.location.href);
-        if (url.searchParams.get("tv") === "1") {
-            url.searchParams.delete("tv");
-        } else {
-            url.searchParams.set("tv", "1");
-        }
-        window.location.href = url.toString();
+        window.open("/?tv=1", "_blank");
     };
 
     return (

@@ -83,6 +83,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 /* Glassmorphism utility */

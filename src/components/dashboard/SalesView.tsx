@@ -119,11 +119,21 @@ export function SalesView() {
         }
     ];
 
-    const filteredData = data.filter(item =>
-        item.nome?.toLowerCase().includes(search.toLowerCase()) ||
-        item.produto?.toLowerCase().includes(search.toLowerCase()) ||
-        item.email?.toLowerCase().includes(search.toLowerCase())
-    );
+    const [statusFilter, setStatusFilter] = useState<string>("ALL");
+    const [originFilter, setOriginFilter] = useState<string>("ALL");
+
+    const filteredData = data.filter(item => {
+        const matchesSearch = item.nome.toLowerCase().includes(search.toLowerCase()) ||
+            item.produto.toLowerCase().includes(search.toLowerCase()) ||
+            item.email?.toLowerCase().includes(search.toLowerCase());
+
+        const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
+        const matchesOrigin = originFilter === "ALL" || item.origem === originFilter;
+
+        return matchesSearch && matchesStatus && matchesOrigin;
+    });
+
+    const [isEditing, setIsEditing] = useState(false);
 
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-3 duration-700">
@@ -144,7 +154,7 @@ export function SalesView() {
 
             {/* Table section */}
             <div className="bg-card/50 backdrop-blur-sm p-8 rounded-[2.5rem] border border-border/60 shadow-premium flex flex-col gap-8">
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col lg:flex-row gap-4">
                     <div className="relative flex-grow">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={18} />
                         <Input
@@ -154,10 +164,47 @@ export function SalesView() {
                             className="h-14 pl-12 pr-4 bg-muted/40 border-border/50 rounded-2xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all text-base"
                         />
                     </div>
-                    <Button variant="outline" className="h-14 px-8 rounded-2xl border-border/60 hover:bg-muted font-bold text-sm">
-                        <Filter size={18} className="mr-2" />
-                        Filtros Avançados
-                    </Button>
+
+                    <div className="flex gap-4">
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="h-14 w-[160px] rounded-2xl border-border/60 bg-muted/30 font-bold text-xs uppercase tracking-wider">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Todos Status</SelectItem>
+                                <SelectItem value="APROVADO">Aprovado</SelectItem>
+                                <SelectItem value="PENDENTE">Pendente</SelectItem>
+                                <SelectItem value="RECUSADO">Recusado</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={originFilter} onValueChange={setOriginFilter}>
+                            <SelectTrigger className="h-14 w-[160px] rounded-2xl border-border/60 bg-muted/30 font-bold text-xs uppercase tracking-wider">
+                                <SelectValue placeholder="Origem" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Todas Origens</SelectItem>
+                                <SelectItem value="KIWIFY">Kiwify</SelectItem>
+                                <SelectItem value="HOTMART">Hotmart</SelectItem>
+                                <SelectItem value="STRIPE">Stripe</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Button
+                            variant="outline"
+                            className="h-14 px-6 rounded-2xl border-border/60 hover:bg-muted font-bold text-sm"
+                            onClick={() => {
+                                setStatusFilter("ALL");
+                                setOriginFilter("ALL");
+                                setSearch("");
+                                toast.success("Filtros limpos!");
+                            }}
+                            title="Limpar Filtros"
+                        >
+                            <Filter size={18} className="mr-2" />
+                            Predefinidos
+                        </Button>
+                    </div>
                 </div>
 
                 <DataTable
@@ -220,9 +267,9 @@ export function SalesView() {
                             Cancelar
                         </Button>
                         <Button
-                            className="rounded-xl font-bold h-12 px-8"
+                            className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20"
                             onClick={() => {
-                                toast.success("Venda enviada para processamento no n8n!");
+                                toast.success("Venda enviada para processamento com sucesso!");
                                 setIsNewSaleOpen(false);
                             }}
                         >
@@ -232,12 +279,17 @@ export function SalesView() {
                 </DialogContent>
             </Dialog>
 
-            {/* Sale Details Modal */}
-            <Dialog open={!!selectedSale} onOpenChange={(open) => !open && setSelectedSale(null)}>
-                <DialogContent className="max-w-xl rounded-[2.5rem] border-border/60 p-0 overflow-hidden">
+            {/* Sale Details & Edit Modal */}
+            <Dialog open={!!selectedSale} onOpenChange={(open) => {
+                if (!open) {
+                    setSelectedSale(null);
+                    setIsEditing(false);
+                }
+            }}>
+                <DialogContent className="max-w-xl rounded-[2.5rem] border-border/60 p-0 overflow-hidden shadow-2xl">
                     {selectedSale && (
                         <>
-                            <div className="bg-primary/5 p-8 pb-12 relative">
+                            <div className="bg-primary/5 p-8 pb-12 relative border-b border-primary/10">
                                 <div className="absolute top-8 right-8">
                                     <Badge variant="success" className="rounded-xl px-4 py-1.5 font-bold uppercase tracking-wider border-none text-xs shadow-lg shadow-success/10">
                                         {selectedSale.status}
@@ -246,31 +298,54 @@ export function SalesView() {
                                 <div className="w-16 h-16 bg-primary rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-primary/20">
                                     <User size={32} />
                                 </div>
-                                <h2 className="text-3xl font-bold text-foreground leading-tight">{selectedSale.nome}</h2>
+                                {isEditing ? (
+                                    <Input
+                                        defaultValue={selectedSale.nome}
+                                        className="text-3xl font-bold bg-transparent border-none focus-visible:ring-offset-0 focus-visible:ring-1 p-0 h-auto"
+                                    />
+                                ) : (
+                                    <h2 className="text-3xl font-bold text-foreground leading-tight">{selectedSale.nome}</h2>
+                                )}
                                 <p className="text-muted-foreground font-medium mt-1 flex items-center gap-2 italic">
                                     <Mail size={14} /> {selectedSale.email}
                                 </p>
                             </div>
 
-                            <div className="p-8 bg-card rounded-t-[2rem] border-t border-border/50 relative z-10 space-y-8 -mt-4 ring-1 ring-black/5 shadow-2xl">
+                            <div className="p-8 bg-card rounded-t-[2.5rem] relative z-10 space-y-8 -mt-6 shadow-2xl">
                                 <div className="grid grid-cols-2 gap-8">
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-1.5 mb-1.5">
-                                            <Tag size={12} /> Produto
+                                            <Tag size={12} /> {isEditing ? "Alterar Produto" : "Produto"}
                                         </p>
-                                        <p className="font-bold text-lg">{selectedSale.produto}</p>
+                                        {isEditing ? (
+                                            <Input defaultValue={selectedSale.produto} className="h-10 rounded-xl bg-muted/40 border-none font-bold" />
+                                        ) : (
+                                            <p className="font-bold text-lg">{selectedSale.produto}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-1 text-right">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-1.5 mb-1.5 justify-end">
                                             <CreditCard size={12} /> Valor
                                         </p>
-                                        <p className="font-bold text-2xl text-primary">{formatCurrency(selectedSale.valor)}</p>
+                                        {isEditing ? (
+                                            <Input
+                                                type="number"
+                                                defaultValue={selectedSale.valor}
+                                                className="text-right font-bold text-2xl text-primary bg-transparent border-none p-0 h-auto"
+                                            />
+                                        ) : (
+                                            <p className="font-bold text-2xl text-primary">{formatCurrency(selectedSale.valor)}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-1.5 mb-1.5">
-                                            <Calendar size={12} /> Data da Transação
+                                            <Calendar size={12} /> {isEditing ? "Nova Data" : "Data da Transação"}
                                         </p>
-                                        <p className="font-medium">{formatDate(selectedSale.data)}</p>
+                                        {isEditing ? (
+                                            <Input type="date" defaultValue={selectedSale.data} className="h-10 rounded-xl bg-muted/40 border-none" />
+                                        ) : (
+                                            <p className="font-medium">{formatDate(selectedSale.data)}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-1 text-right">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-1.5 mb-1.5 justify-end">
@@ -282,25 +357,52 @@ export function SalesView() {
 
                                 <div className="pt-6 border-t border-border/40">
                                     <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Informações Adicionais</p>
-                                    <div className="bg-muted/30 p-5 rounded-2xl border border-border/30 text-sm italic">
-                                        "{selectedSale.descricao}"
-                                    </div>
+                                    {isEditing ? (
+                                        <Input defaultValue={selectedSale.descricao} className="h-20 rounded-xl bg-muted/30 border-border/40" />
+                                    ) : (
+                                        <div className="bg-muted/30 p-5 rounded-2xl border border-border/30 text-sm italic">
+                                            "{selectedSale.descricao}"
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="flex gap-4 pt-2">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1 h-12 rounded-xl font-bold border-border/60"
-                                        onClick={() => toast.info("Funcionalidade de edição disponível em breve!")}
-                                    >
-                                        Editar Dados
-                                    </Button>
-                                    <Button
-                                        className="flex-1 h-12 rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
-                                        onClick={() => toast.success("Ação processada com sucesso!")}
-                                    >
-                                        Ações da Venda
-                                    </Button>
+                                    {isEditing ? (
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                className="flex-1 h-12 rounded-xl font-bold"
+                                                onClick={() => setIsEditing(false)}
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                className="flex-1 h-12 rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
+                                                onClick={() => {
+                                                    toast.success("Venda atualizada com sucesso!");
+                                                    setIsEditing(false);
+                                                }}
+                                            >
+                                                Salvar Alterações
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Button
+                                                variant="outline"
+                                                className="flex-1 h-12 rounded-xl font-bold border-border/60"
+                                                onClick={() => setIsEditing(true)}
+                                            >
+                                                Editar Dados
+                                            </Button>
+                                            <Button
+                                                className="flex-1 h-12 rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
+                                                onClick={() => toast.success("Processando atualização no gateway...")}
+                                            >
+                                                Ações da Venda
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </>
