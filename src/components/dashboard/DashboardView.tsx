@@ -38,6 +38,7 @@ interface DashboardViewProps {
     lastSync: Date;
     onViewSales?: () => void;
     onViewMeetings?: () => void;
+    onViewFinance?: () => void;
 }
 
 const COLORS = ["#0066ff", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
@@ -72,7 +73,7 @@ function getChartData(transactions: Transaction[]) {
     }));
 }
 
-export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, onViewMeetings }: DashboardViewProps) {
+export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, onViewMeetings, onViewFinance }: DashboardViewProps) {
     const kpis = data?.kpis;
     const transactions = data?.transactions || [];
     const meetings = data?.meetings || [];
@@ -135,6 +136,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     trend={0}
                     icon={<TrendingUp size={24} />}
                     loading={loading}
+                    onClick={onViewSales}
                 />
                 <KPICard
                     title="Receita Total"
@@ -143,6 +145,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     trend={0}
                     icon={<DollarSign size={24} />}
                     loading={loading}
+                    onClick={onViewSales}
                 />
                 <KPICard
                     title="Custo Operacional"
@@ -151,6 +154,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     trend={0}
                     icon={<ShoppingCart size={24} />}
                     loading={loading}
+                    onClick={onViewFinance}
                 />
                 <KPICard
                     title="Lucro Líquido"
@@ -159,6 +163,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     trend={0}
                     icon={<BarChart3 size={24} />}
                     loading={loading}
+                    onClick={onViewFinance}
                 />
             </div>
 
@@ -286,8 +291,12 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                         </Button>
                     </CardHeader>
                     <CardContent className="p-8 pt-2 space-y-4">
-                        {recentSales.map((sale, i) => (
-                            <div key={sale.id} className="group flex items-center justify-between p-5 bg-muted/20 hover:bg-muted/40 rounded-2xl border border-border/50 transition-all duration-300">
+                        {recentSales.map((sale) => (
+                            <div
+                                key={sale.id}
+                                onClick={onViewSales}
+                                className="group flex items-center justify-between p-5 bg-muted/20 hover:bg-muted/40 rounded-2xl border border-border/50 transition-all duration-300 cursor-pointer hover:border-primary/30"
+                            >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-black group-hover:scale-105 transition-transform border border-primary/10">
                                         {sale.nome?.[0] || "U"}
@@ -326,7 +335,11 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     </CardHeader>
                     <CardContent className="p-8 pt-2 space-y-4">
                         {todayMeetings.map((meeting) => (
-                            <div key={meeting.id} className="group flex items-center justify-between p-5 bg-muted/20 hover:bg-muted/40 rounded-2xl border border-border/50 transition-all duration-300">
+                            <div
+                                key={meeting.id}
+                                onClick={onViewMeetings}
+                                className="group flex items-center justify-between p-5 bg-muted/20 hover:bg-muted/40 rounded-2xl border border-border/50 transition-all duration-300 cursor-pointer hover:border-success/30"
+                            >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-success/10 text-success rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform border border-success/10">
                                         <Clock size={24} />

@@ -25,16 +25,33 @@ import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function DashboardContent() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const initialTab = searchParams.get("tab") || "dashboard";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [lastSync, setLastSync] = useState<Date>(new Date());
-  const [isSimulationMode, setIsSimulationMode] = useState(false); // Default to real data
+  const [isSimulationMode, setIsSimulationMode] = useState(false);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGoalsOpen, setIsGoalsOpen] = useState(false);
-  const searchParams = useSearchParams();
-  const router = useRouter();
+
+  // Sync state with URL when browser history changes
+  useEffect(() => {
+    const tab = searchParams.get("tab") || "dashboard";
+    if (tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams, activeTab]);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   const isTVMode = searchParams.get("tv") === "1";
 
   const fetchData = useCallback(async () => {
@@ -86,9 +103,9 @@ function DashboardContent() {
     }
   }, [fetchData, isTVMode]);
 
-  const handleNewSale = () => setActiveTab("sales");
-  const handleNewExpense = () => setActiveTab("finance");
-  const handleNewMeeting = () => setActiveTab("meetings");
+  const handleNewSale = () => handleTabChange("sales");
+  const handleNewExpense = () => handleTabChange("finance");
+  const handleNewMeeting = () => handleTabChange("meetings");
 
   if (isTVMode) {
     return <ModoTV data={data} loading={loading} lastSync={lastSync} />;
@@ -110,7 +127,7 @@ function DashboardContent() {
         onConfigGoal={() => setIsGoalsOpen(true)}
       />
 
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
       <div className="p-6 lg:p-12 max-w-[1600px] mx-auto">
         {loading ? (
@@ -135,8 +152,9 @@ function DashboardContent() {
                 loading={loading}
                 isTVMode={isTVMode}
                 lastSync={lastSync}
-                onViewSales={() => setActiveTab("sales")}
-                onViewMeetings={() => setActiveTab("meetings")}
+                onViewSales={() => handleTabChange("sales")}
+                onViewMeetings={() => handleTabChange("meetings")}
+                onViewFinance={() => handleTabChange("finance")}
               />
             )}
             {activeTab === "sales" && <SalesView />}
