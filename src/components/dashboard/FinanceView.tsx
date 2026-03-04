@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, User, Tag, MoreHorizontal, TrendingUp, X, LayoutGrid, List, Loader2, Target } from "lucide-react";
+import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, Tag, TrendingUp, X, LayoutGrid, List, Target, ChevronRight, ReceiptText, MoreHorizontal } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useGoals, progressColor } from "@/hooks/useGoals";
 import { GanttChart } from "./GanttChart";
@@ -209,7 +209,9 @@ export function FinanceView() {
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Total Liquidado</p>
-                            <p className="text-2xl font-bold text-foreground">{formatCurrency(2450)}</p>
+                            <p className="text-2xl font-bold text-foreground">
+                                {formatCurrency(allData.filter(t => t.status === 'PAGO').reduce((s, t) => s + t.valor, 0))}
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
@@ -220,7 +222,9 @@ export function FinanceView() {
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Total Previsto</p>
-                            <p className="text-2xl font-bold text-foreground">{formatCurrency(activeSubTab === 'DESPESA' ? 3300 : 12000)}</p>
+                            <p className="text-2xl font-bold text-foreground">
+                                {formatCurrency(allData.filter(t => t.status === 'PREVISTO').reduce((s, t) => s + t.valor, 0))}
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
@@ -231,7 +235,12 @@ export function FinanceView() {
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-primary/70 uppercase tracking-[0.1em] mb-1">Balanço do Mês</p>
-                            <p className="text-2xl font-bold text-primary">{formatCurrency(activeSubTab === 'DESPESA' ? -5750 : -14450)}</p>
+                            <p className="text-2xl font-bold text-primary">
+                                {formatCurrency(
+                                    allData.filter(t => t.tipo === 'RECEITA' && t.status === 'APROVADO').reduce((s, t) => s + t.valor, 0) -
+                                    allData.filter(t => t.tipo !== 'RECEITA' && (t.status === 'PAGO' || t.status === 'PREVISTO')).reduce((s, t) => s + t.valor, 0)
+                                )}
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
@@ -247,7 +256,7 @@ export function FinanceView() {
                         </TabsList>
                     </Tabs>
 
-                    <div className="flex items-center gap-4 w-full sm:w-auto flex-1 max-w-md">
+                    <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto flex-1">
                         <div className="relative flex-grow">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={18} />
                             <Input

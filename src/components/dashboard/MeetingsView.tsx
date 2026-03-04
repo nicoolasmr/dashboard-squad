@@ -122,7 +122,6 @@ export function MeetingsView() {
 
     const [isEditing, setIsEditing] = useState(false);
     const [viewMode, setViewMode] = useState<"TABLE" | "GANTT">("TABLE");
-
     // Map meetings to Gantt format
     const ganttData = filteredData.map(m => {
         const startDate = new Date(m.data_hora);
@@ -146,6 +145,12 @@ export function MeetingsView() {
             status: m.status
         };
     });
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const tomorrowStr = new Date(new Date().getTime() + 86400000).toISOString().slice(0, 10);
+    const totalHoje = data.filter(m => m.data_hora.startsWith(todayStr)).length;
+    const feitasHoje = data.filter(m => m.data_hora.startsWith(todayStr) && m.status === 'FEITA').length;
+    const totalAmanha = data.filter(m => m.data_hora.startsWith(tomorrowStr)).length;
 
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -171,9 +176,9 @@ export function MeetingsView() {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Hoje</p>
                         <div className="flex items-end justify-between">
                             <div className="flex flex-col">
-                                <h3 className="text-5xl font-bold tracking-tighter">12</h3>
+                                <h3 className="text-5xl font-bold tracking-tighter">{totalHoje}</h3>
                                 <p className="text-xs font-bold text-success mt-1 flex items-center gap-1.5">
-                                    <CheckCircle2 size={12} /> 4 realizadas
+                                    <CheckCircle2 size={12} /> {feitasHoje} realizadas
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
@@ -187,7 +192,7 @@ export function MeetingsView() {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Amanhã</p>
                         <div className="flex items-end justify-between">
                             <div className="flex flex-col">
-                                <h3 className="text-5xl font-bold tracking-tighter">08</h3>
+                                <h3 className="text-5xl font-bold tracking-tighter">{totalAmanha.toString().padStart(2, '0')}</h3>
                                 <p className="text-xs font-bold text-muted-foreground mt-1 flex items-center gap-1.5 uppercase">
                                     Confirmadas
                                 </p>

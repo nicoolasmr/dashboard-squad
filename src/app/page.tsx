@@ -29,7 +29,7 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [lastSync, setLastSync] = useState<Date>(new Date());
-  const [isSimulationMode, setIsSimulationMode] = useState(true); // Default to simulation for nice UI demo
+  const [isSimulationMode, setIsSimulationMode] = useState(false); // Default to real data
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGoalsOpen, setIsGoalsOpen] = useState(false);

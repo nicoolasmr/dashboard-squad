@@ -113,7 +113,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-br from-foreground via-foreground to-foreground/50 bg-clip-text text-transparent">Centro de Comando</h1>
-                    <p className="text-muted-foreground mt-2 text-base font-medium">Sincronizado há {Math.floor((new Date().getTime() - lastSync.getTime()) / 60000)} minutos.</p>
+                    <p className="text-muted-foreground mt-2 text-base font-medium">Sincronizado {Math.floor((new Date().getTime() - lastSync.getTime()) / 60000) === 0 ? 'agora' : `há ${Math.floor((new Date().getTime() - lastSync.getTime()) / 60000)} minutos`}.</p>
                 </div>
                 <div className="flex items-center gap-3 bg-card/40 border border-border/40 p-2 pr-6 rounded-2xl backdrop-blur-md shadow-sm">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary animate-pulse">
@@ -132,7 +132,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     title="Receita Aprovada"
                     value={kpis?.receita_aprovada || 0}
                     type="currency"
-                    trend={12}
+                    trend={0}
                     icon={<TrendingUp size={24} />}
                     loading={loading}
                 />
@@ -140,7 +140,7 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     title="Receita Total"
                     value={kpis?.receita_total || 0}
                     type="currency"
-                    trend={8}
+                    trend={0}
                     icon={<DollarSign size={24} />}
                     loading={loading}
                 />
@@ -148,15 +148,15 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                     title="Custo Operacional"
                     value={kpis?.custos_total || 0}
                     type="currency"
-                    trend={-5}
-                    icon={<AlertCircle size={24} />}
+                    trend={0}
+                    icon={<ShoppingCart size={24} />}
                     loading={loading}
                 />
                 <KPICard
                     title="Lucro Líquido"
                     value={kpis?.lucro || 0}
                     type="currency"
-                    trend={15}
+                    trend={0}
                     icon={<BarChart3 size={24} />}
                     loading={loading}
                 />

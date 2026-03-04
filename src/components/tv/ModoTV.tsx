@@ -158,7 +158,9 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                                     <div className="bg-white/5 p-12 rounded-[3.5rem] border border-white/10 flex flex-col justify-center">
                                         <p className="text-xl font-bold text-white/30 uppercase tracking-[0.3em] mb-4">Daily Velocity</p>
                                         <div className="flex items-baseline gap-4">
-                                            <h3 className="text-8xl font-black tracking-tighter">1,4k</h3>
+                                            <h3 className="text-8xl font-black tracking-tighter">
+                                                {(receitaReal / Math.max(1, new Date().getDate())).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}k
+                                            </h3>
                                             <span className="text-2xl font-bold text-success">/DAY</span>
                                         </div>
                                     </div>
@@ -179,17 +181,21 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                                     <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
                                 </p>
                                 <div className="space-y-10">
-                                    {[1, 2, 3, 4].map((i) => (
-                                        <div key={i} className="flex gap-8 group">
-                                            <div className="w-20 h-20 bg-white/5 rounded-[2rem] border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                <Zap className="text-primary" size={32} />
+                                    {(data?.transactions || [])
+                                        .filter(t => t.tipo === 'RECEITA')
+                                        .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+                                        .slice(0, 4)
+                                        .map((t, i) => (
+                                            <div key={t.id || i} className="flex gap-8 group">
+                                                <div className="w-20 h-20 bg-white/5 rounded-[2rem] border border-border/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <Zap className="text-primary" size={32} />
+                                                </div>
+                                                <div className="flex flex-col justify-center gap-1">
+                                                    <p className="text-3xl font-black leading-none uppercase tracking-tighter line-clamp-1">{t.nome || "New Conversion"}</p>
+                                                    <p className="text-lg font-bold text-white/30 uppercase leading-none mt-2"> {t.produto || "Mentoria Squad"} • {formatCurrency(t.valor)}</p>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col justify-center gap-1">
-                                                <p className="text-3xl font-black leading-none uppercase tracking-tighter">New Conversion</p>
-                                                <p className="text-lg font-bold text-white/30 uppercase leading-none mt-2"> Mentoria Squad • $1.5k</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
                                 </div>
 
                                 <div className="mt-auto pt-12 border-t border-white/5">
