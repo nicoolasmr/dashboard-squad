@@ -12,7 +12,7 @@ import {
     Cell,
 } from "recharts";
 import { motion } from "framer-motion";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export interface GanttTask {
@@ -31,28 +31,52 @@ interface GanttChartProps {
     type: "SALES" | "FINANCE" | "MEETINGS";
 }
 
-// Normalize raw timestamps into relative hours from earliest start
+// Convert timestamps to day-based offsets for real calendar X-axis
 function normalize(data: GanttTask[]) {
-    if (!data.length) return [];
+    if (!data.length) return { items: [], minStart: 0, maxEnd: 0, useHours: false };
     const minStart = Math.min(...data.map((d) => d.start));
-    const hour = 1000 * 60 * 60;
-    return data.map((d) => ({
+    const maxEnd = Math.max(...data.map((d) => d.start + d.duration));
+    const totalMs = maxEnd - minStart;
+    const totalDays = totalMs / (1000 * 60 * 60 * 24);
+
+    // If range < 3 days, fall back to hours for precision
+    const useHours = totalDays < 3;
+    const unit = useHours ? 1000 * 60 * 60 : 1000 * 60 * 60 * 24;
+    const unitLabel = useHours ? "h" : "d";
+
+    const items = data.map((d) => ({
         ...d,
-        _offset: (d.start - minStart) / hour,          // hours from origin
-        _duration: Math.max(d.duration / hour, 1),      // at least 1h bar
-        _label: format(new Date(d.start), "dd/MM HH:mm", { locale: ptBR }),
+        _offset: (d.start - minStart) / unit,
+        _duration: Math.max(d.duration / unit, useHours ? 1 : 0.5),
+        _startDate: new Date(d.start),
     }));
+
+    return { items, minStart, maxEnd, useHours, unit, unitLabel };
+}
+
+// Tick formatter: show real date labels
+function makeTickFormatter(minStart: number, useHours: boolean) {
+    return (val: number) => {
+        const ms = minStart + val * (useHours ? 3600000 : 86400000);
+        const d = new Date(ms);
+        if (useHours) return format(d, "HH'h'", { locale: ptBR });
+        const diffDays = differenceInCalendarDays(new Date(), d);
+        if (Math.abs(diffDays) > 60) return format(d, "MMM/yy", { locale: ptBR });
+        return format(d, "dd/MM", { locale: ptBR });
+    };
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.length) return null;
-    const d = payload[0]?.payload as ReturnType<typeof normalize>[0] & { _label: string };
+    const d = payload[0]?.payload;
     if (!d) return null;
     return (
         <div className="bg-popover border border-border p-3 rounded-xl shadow-xl text-sm min-w-[180px]">
             <p className="font-bold text-foreground mb-1 truncate">{d.name}</p>
             <p className="text-muted-foreground">
-                Data: <span className="text-foreground font-medium">{d._label}</span>
+                Data: <span className="text-foreground font-medium">
+                    {format(d._startDate, "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                </span>
             </p>
             <p className="text-muted-foreground">
                 Status:{" "}
@@ -69,15 +93,14 @@ const CustomTooltip = ({ active, payload }: any) => {
     );
 };
 
-// Truncate name to single line, max 18 chars
 function truncateName(name: string, max = 18) {
     return name.length > max ? name.slice(0, max - 1) + "…" : name;
 }
 
 export function GanttChart({ data, height = 380, type }: GanttChartProps) {
-    const normalized = normalize(data);
+    const { items, minStart, useHours } = normalize(data);
 
-    if (!normalized.length) {
+    if (!items.length) {
         return (
             <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
                 Nenhum dado para exibir no Gantt.
@@ -85,7 +108,8 @@ export function GanttChart({ data, height = 380, type }: GanttChartProps) {
         );
     }
 
-    const barSize = Math.max(24, Math.min(40, Math.floor(height / (normalized.length + 2))));
+    const barSize = Math.max(24, Math.min(40, Math.floor(height / (items.length + 2))));
+    const tickFormatter = makeTickFormatter(minStart, useHours ?? false);
 
     return (
         <motion.div
@@ -97,7 +121,7 @@ export function GanttChart({ data, height = 380, type }: GanttChartProps) {
         >
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                    data={normalized}
+                    data={items}
                     layout="vertical"
                     margin={{ top: 8, right: 100, left: 140, bottom: 8 }}
                     barSize={barSize}
@@ -110,11 +134,12 @@ export function GanttChart({ data, height = 380, type }: GanttChartProps) {
                     />
                     <XAxis
                         type="number"
-                        domain={[0, (dataMax: number) => Math.ceil(dataMax) + 2]}
+                        domain={[0, (dataMax: number) => Math.ceil(dataMax) + (useHours ? 2 : 1)]}
                         tick={{ fontSize: 10, fill: "var(--muted-foreground, #888)" }}
-                        tickFormatter={(v) => `+${Math.round(v)}h`}
+                        tickFormatter={tickFormatter}
                         axisLine={false}
                         tickLine={false}
+                        tickCount={7}
                     />
                     <YAxis
                         dataKey="name"
@@ -127,21 +152,21 @@ export function GanttChart({ data, height = 380, type }: GanttChartProps) {
                     />
                     <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(120,120,120,0.06)" }} />
 
-                    {/* Invisible offset bar to push the real bar to the right */}
+                    {/* Invisible offset bar */}
                     <Bar dataKey="_offset" stackId="gantt" fill="transparent" />
 
                     {/* Visible duration bar */}
                     <Bar dataKey="_duration" stackId="gantt" radius={[0, 6, 6, 0]}>
-                        {normalized.map((entry, i) => (
+                        {items.map((entry, i) => (
                             <Cell key={i} fill={entry.color} fillOpacity={0.85} />
                         ))}
                     </Bar>
                 </BarChart>
             </ResponsiveContainer>
 
-            {/* Custom legend aligned right as status pills */}
+            {/* Status legend */}
             <div className="flex flex-wrap gap-2 justify-end mt-2 pr-2">
-                {[...new Map(normalized.map((d) => [d.status, d.color])).entries()].map(
+                {[...new Map(items.map((d) => [d.status, d.color])).entries()].map(
                     ([status, color]) => (
                         <span
                             key={status}

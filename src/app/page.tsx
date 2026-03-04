@@ -17,6 +17,7 @@ import { MeetingsView } from "@/components/dashboard/MeetingsView";
 import { ImportView } from "@/components/import/ImportTool";
 import { ModoTV } from "@/components/tv/ModoTV";
 import { ConnectionSettings } from "@/components/layout/ConnectionSettings";
+import { GoalsConfig } from "@/components/dashboard/GoalsConfig";
 import { ZeroState } from "@/components/ui/zero-state";
 import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ function DashboardContent() {
   const [isSimulationMode, setIsSimulationMode] = useState(true); // Default to simulation for nice UI demo
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isGoalsOpen, setIsGoalsOpen] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const isTVMode = searchParams.get("tv") === "1";
@@ -103,6 +105,7 @@ function DashboardContent() {
         onNewExpense={handleNewExpense}
         onNewMeeting={handleNewMeeting}
         onSettings={() => setIsSettingsOpen(true)}
+        onConfigGoal={() => setIsGoalsOpen(true)}
       />
 
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -170,6 +173,7 @@ function DashboardContent() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
+      <GoalsConfig open={isGoalsOpen} onClose={() => setIsGoalsOpen(false)} />
     </main>
   );
 }

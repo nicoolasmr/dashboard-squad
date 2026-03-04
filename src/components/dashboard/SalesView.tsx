@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, MoreHorizontal, User, Mail, CreditCard, Calendar, Tag, ExternalLink, LayoutGrid, List, Loader2 } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, User, Mail, CreditCard, Calendar, Tag, ExternalLink, LayoutGrid, List, Loader2, Target } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useGoals, goalProgress, progressColor } from "@/hooks/useGoals";
 import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +30,9 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function SalesView() {
+    const currentMes = new Date().toISOString().slice(0, 7);
     const { data, loading, create } = useTransactions("RECEITA");
+    const { goal } = useGoals(currentMes);
     const [isNewSaleOpen, setIsNewSaleOpen] = useState(false);
     const [selectedSale, setSelectedSale] = useState<Transaction | null>(null);
     const [search, setSearch] = useState("");
@@ -156,6 +159,33 @@ export function SalesView() {
                 </Button>
             </div>
 
+            {/* Meta Progress Bar */}
+            {goal && (goal.meta_receita ?? 0) > 0 && (() => {
+                const receitaReal = data.filter(t => t.status === 'APROVADO').reduce((s, t) => s + t.valor, 0);
+                const metaReceita = goal.meta_receita ?? 0;
+                const pct = Math.min(100, (receitaReal / metaReceita) * 100);
+                const color = progressColor(pct);
+                return (
+                    <div className="bg-card/50 backdrop-blur-sm rounded-[1.5rem] border border-border/40 p-5 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm font-bold">
+                                <Target size={16} className="text-amber-500" />
+                                <span>Meta de Receita — {new Date().toLocaleDateString('pt-BR', { month: 'long' })}</span>
+                            </div>
+                            <div className="text-sm font-black" style={{ color }}>
+                                {receitaReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {metaReceita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                <span className="ml-2 opacity-70">({pct.toFixed(0)}%)</span>
+                            </div>
+                        </div>
+                        <div className="h-3 bg-muted/50 rounded-full overflow-hidden">
+                            <div
+                                className="h-full rounded-full transition-all duration-700"
+                                style={{ width: `${pct}%`, backgroundColor: color }}
+                            />
+                        </div>
+                    </div>
+                );
+            })()}
             {/* Table section */}
             <div className="bg-card/50 backdrop-blur-sm p-8 rounded-[2.5rem] border border-border/60 shadow-premium flex flex-col gap-8">
                 <div className="flex flex-col lg:flex-row gap-4">

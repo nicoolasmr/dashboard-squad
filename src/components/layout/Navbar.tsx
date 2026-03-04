@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sun, Moon, Tv, RefreshCw, PlusCircle, Settings } from "lucide-react";
+import { Sun, Moon, Tv, RefreshCw, PlusCircle, Settings, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Tooltip,
@@ -17,9 +17,10 @@ interface NavbarProps {
     onNewExpense: () => void;
     onNewMeeting: () => void;
     onSettings: () => void;
+    onConfigGoal?: () => void;
 }
 
-export function Navbar({ onRefresh, onNewSale, onNewExpense, onNewMeeting, onSettings }: NavbarProps) {
+export function Navbar({ onRefresh, onNewSale, onNewExpense, onNewMeeting, onSettings, onConfigGoal }: NavbarProps) {
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
@@ -86,6 +87,16 @@ export function Navbar({ onRefresh, onNewSale, onNewExpense, onNewMeeting, onSet
                     >
                         <PlusCircle size={14} />
                         Reunião
+                    </Button>
+                    <div className="w-px h-5 bg-border" />
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onConfigGoal}
+                        className="h-8 rounded-xl text-amber-500 hover:bg-amber-500/10 hover:text-amber-500 gap-2"
+                    >
+                        <Target size={14} />
+                        Meta do Mês
                     </Button>
                 </div>
 

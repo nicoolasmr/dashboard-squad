@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useGoals, goalProgress, progressColor } from "@/hooks/useGoals";
 
 interface ModoTVProps {
     data: DashboardData | null;
@@ -20,6 +22,13 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
     const router = useRouter();
     const views = ["OPERATIONAL OVERVIEW", "SALES PIPELINE", "FINANCIAL METRICS"];
     const kpis = data?.kpis;
+    const currentMes = new Date().toISOString().slice(0, 7);
+    const { data: txData } = useTransactions("RECEITA");
+    const { goal } = useGoals(currentMes);
+    const receitaReal = txData.filter(t => t.status === 'APROVADO').reduce((s, t) => s + t.valor, 0);
+    const metaReceita = goal?.meta_receita ?? 0;
+    const pct = metaReceita > 0 ? Math.min(100, Math.round((receitaReal / metaReceita) * 100)) : 0;
+    const barColor = progressColor(pct);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -129,16 +138,18 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                                         </h2>
                                         <div className="flex items-center gap-8">
                                             <Badge className="text-4xl px-10 py-4 rounded-3xl bg-success text-white font-black">
-                                                +12.4%
+                                                {pct}%
                                             </Badge>
                                             <div className="flex-grow h-4 bg-white/5 rounded-full overflow-hidden">
                                                 <motion.div
                                                     initial={{ width: 0 }}
-                                                    animate={{ width: '68%' }}
-                                                    className="h-full bg-gradient-to-r from-primary to-primary-foreground shadow-[0_0_20px_rgba(0,102,255,0.5)]"
+                                                    animate={{ width: `${pct}%` }}
+                                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                                    className="h-full shadow-[0_0_20px_rgba(0,102,255,0.5)]"
+                                                    style={{ backgroundColor: barColor }}
                                                 />
                                             </div>
-                                            <span className="text-3xl font-black opacity-40">68% OF GOAL</span>
+                                            <span className="text-3xl font-black opacity-40">{pct}% OF GOAL</span>
                                         </div>
                                     </div>
                                 </div>
