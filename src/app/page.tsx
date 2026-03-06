@@ -107,10 +107,36 @@ function DashboardContent() {
   useEffect(() => {
     fetchData();
 
+    // REAL-TIME SYNC: Listen for changes in transactions or meetings
+    const transactionChannel = supabase
+      .channel("dashboard_tx_sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, () => {
+        console.log("Realtime Update: Transactions changed");
+        fetchData();
+      })
+      .subscribe();
+
+    const meetingChannel = supabase
+      .channel("dashboard_mt_sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "meetings" }, () => {
+        console.log("Realtime Update: Meetings changed");
+        fetchData();
+      })
+      .subscribe();
+
     if (isTVMode) {
       const interval = setInterval(fetchData, 60000);
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        supabase.removeChannel(transactionChannel);
+        supabase.removeChannel(meetingChannel);
+      };
     }
+
+    return () => {
+      supabase.removeChannel(transactionChannel);
+      supabase.removeChannel(meetingChannel);
+    };
   }, [fetchData, isTVMode]);
 
   const handleNewSale = () => handleTabChange("sales");

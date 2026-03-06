@@ -37,6 +37,7 @@ export function SalesView() {
     const [selectedSale, setSelectedSale] = useState<Transaction | null>(null);
     const [search, setSearch] = useState("");
     const [saving, setSaving] = useState(false);
+    const { update } = useTransactions();
 
     // Controlled form state
     const [form, setForm] = useState({
@@ -395,7 +396,7 @@ export function SalesView() {
                         <>
                             <div className="bg-primary/5 p-8 pb-12 relative border-b border-primary/10">
                                 <div className="absolute top-8 right-8">
-                                    <Badge variant="success" className="rounded-xl px-4 py-1.5 font-bold uppercase tracking-wider border-none text-xs shadow-lg shadow-success/10">
+                                    <Badge variant={selectedSale.status === 'APROVADO' ? 'success' : 'warning'} className="rounded-xl px-4 py-1.5 font-bold uppercase tracking-wider border-none text-xs shadow-lg shadow-success/10">
                                         {selectedSale.status}
                                     </Badge>
                                 </div>
@@ -404,7 +405,8 @@ export function SalesView() {
                                 </div>
                                 {isEditing ? (
                                     <Input
-                                        defaultValue={selectedSale.nome}
+                                        value={selectedSale.nome}
+                                        onChange={e => setSelectedSale(s => s ? { ...s, nome: e.target.value } : null)}
                                         className="text-3xl font-bold bg-transparent border-none focus-visible:ring-offset-0 focus-visible:ring-1 p-0 h-auto"
                                     />
                                 ) : (
@@ -422,7 +424,11 @@ export function SalesView() {
                                             <Tag size={12} /> {isEditing ? "Alterar Produto" : "Produto"}
                                         </p>
                                         {isEditing ? (
-                                            <Input defaultValue={selectedSale.produto} className="h-10 rounded-xl bg-muted/40 border-none font-bold" />
+                                            <Input
+                                                value={selectedSale.produto}
+                                                onChange={e => setSelectedSale(s => s ? { ...s, produto: e.target.value } : null)}
+                                                className="h-10 rounded-xl bg-muted/40 border-none font-bold"
+                                            />
                                         ) : (
                                             <p className="font-bold text-lg">{selectedSale.produto}</p>
                                         )}
@@ -434,7 +440,8 @@ export function SalesView() {
                                         {isEditing ? (
                                             <Input
                                                 type="number"
-                                                defaultValue={selectedSale.valor}
+                                                value={selectedSale.valor}
+                                                onChange={e => setSelectedSale(s => s ? { ...s, valor: parseFloat(e.target.value) || 0 } : null)}
                                                 className="text-right font-bold text-2xl text-primary bg-transparent border-none p-0 h-auto"
                                             />
                                         ) : (
@@ -446,23 +453,51 @@ export function SalesView() {
                                             <Calendar size={12} /> {isEditing ? "Nova Data" : "Data da Transação"}
                                         </p>
                                         {isEditing ? (
-                                            <Input type="date" defaultValue={selectedSale.data} className="h-10 rounded-xl bg-muted/40 border-none" />
+                                            <Input
+                                                type="date"
+                                                value={selectedSale.data}
+                                                onChange={e => setSelectedSale(s => s ? { ...s, data: e.target.value } : null)}
+                                                className="h-10 rounded-xl bg-muted/40 border-none"
+                                            />
                                         ) : (
                                             <p className="font-medium">{formatDate(selectedSale.data)}</p>
                                         )}
                                     </div>
                                     <div className="space-y-1 text-right">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-1.5 mb-1.5 justify-end">
-                                            <ExternalLink size={12} /> Origem
+                                            <ExternalLink size={12} /> Status / Origem
                                         </p>
-                                        <p className="font-medium">{selectedSale.origem}</p>
+                                        <div className="flex flex-col items-end gap-1">
+                                            {isEditing ? (
+                                                <Select defaultValue={selectedSale.status} onValueChange={v => setSelectedSale(s => s ? { ...s, status: v as any } : null)}>
+                                                    <SelectTrigger className="h-9 w-32 rounded-lg bg-muted/40 border-none font-bold text-[10px] uppercase">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="APROVADO">Aprovado</SelectItem>
+                                                        <SelectItem value="PENDENTE">Pendente</SelectItem>
+                                                        <SelectItem value="CANCELADO">Cancelado</SelectItem>
+                                                        <SelectItem value="REEMBOLSADO">Reembolsado</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <Badge variant={selectedSale.status === 'APROVADO' ? 'success' : 'warning'} className="rounded-md px-2 py-0.5 font-bold uppercase tracking-wider border-none text-[9px]">
+                                                    {selectedSale.status}
+                                                </Badge>
+                                            )}
+                                            <p className="font-medium text-xs opacity-70 italic">{selectedSale.origem}</p>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className="pt-6 border-t border-border/40">
                                     <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Informações Adicionais</p>
                                     {isEditing ? (
-                                        <Input defaultValue={selectedSale.descricao} className="h-20 rounded-xl bg-muted/30 border-border/40" />
+                                        <Input
+                                            value={selectedSale.descricao}
+                                            onChange={e => setSelectedSale(s => s ? { ...s, descricao: e.target.value } : null)}
+                                            className="h-20 rounded-xl bg-muted/30 border-border/40"
+                                        />
                                     ) : (
                                         <div className="bg-muted/30 p-5 rounded-2xl border border-border/30 text-sm italic">
                                             "{selectedSale.descricao}"
@@ -482,11 +517,28 @@ export function SalesView() {
                                             </Button>
                                             <Button
                                                 className="flex-1 h-12 rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
-                                                onClick={() => {
-                                                    toast.success("Venda atualizada com sucesso!");
-                                                    setIsEditing(false);
+                                                disabled={saving}
+                                                onClick={async () => {
+                                                    setSaving(true);
+                                                    try {
+                                                        await update(selectedSale.id, {
+                                                            nome: selectedSale.nome,
+                                                            produto: selectedSale.produto,
+                                                            data: selectedSale.data,
+                                                            status: selectedSale.status,
+                                                            valor: selectedSale.valor,
+                                                            descricao: selectedSale.descricao
+                                                        });
+                                                        toast.success("Venda atualizada com sucesso!");
+                                                        setIsEditing(false);
+                                                    } catch (e: any) {
+                                                        toast.error(`Erro ao atualizar: ${e.message}`);
+                                                    } finally {
+                                                        setSaving(false);
+                                                    }
                                                 }}
                                             >
+                                                {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : null}
                                                 Salvar Alterações
                                             </Button>
                                         </>

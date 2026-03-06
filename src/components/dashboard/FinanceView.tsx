@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, Tag, TrendingUp, X, LayoutGrid, List, Target, ChevronRight, ReceiptText, MoreHorizontal } from "lucide-react";
+import { Plus, Search, Filter, ArrowUpCircle, ArrowDownCircle, Wallet, Receipt, Calendar, Tag, TrendingUp, X, LayoutGrid, List, Target, ChevronRight, ReceiptText, MoreHorizontal, Loader2 } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useGoals, progressColor } from "@/hooks/useGoals";
 import { GanttChart } from "./GanttChart";
@@ -45,9 +45,9 @@ export function FinanceView() {
     const [search, setSearch] = useState("");
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState({
-        descricao: "", categoria: "", valor: "", responsavel: "",
+        descricao: "", categoria: "", valor: "", responsavel: "Financeiro",
         data: new Date().toISOString().slice(0, 10), status: "PREVISTO" as string,
-        recorrencia: "PONTUAL" as string, parcelas: "1"
+        recorrencia: "PONTUAL" as string, parcelas: "1", subcategoria: ""
     });
 
     const columns: any[] = [
@@ -362,29 +362,43 @@ export function FinanceView() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 pointer-events-auto">
                         <div className="space-y-2 md:col-span-2">
                             <Label htmlFor="desc" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Descrição do Gasto</Label>
-                            <Input id="desc" placeholder="Ex: Upgrade Servidores AWS" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Input
+                                id="desc"
+                                placeholder="Ex: Upgrade Servidores AWS"
+                                value={form.descricao}
+                                onChange={e => setForm(f => ({ ...f, descricao: e.target.value }))}
+                                className="h-12 rounded-xl bg-muted/30 border-border/40"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="cat" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Categoria</Label>
-                            <Select>
-                                <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40">
+                            <Select value={form.categoria} onValueChange={v => setForm(f => ({ ...f, categoria: v }))}>
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40 font-bold uppercase text-[10px]">
                                     <SelectValue placeholder="Selecione..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="inf">Infraestrutura</SelectItem>
-                                    <SelectItem value="mkt">Marketing</SelectItem>
-                                    <SelectItem value="ops">Operação</SelectItem>
-                                    <SelectItem value="ppl">Pessoal</SelectItem>
+                                    <SelectItem value="Infraestrutura">Infraestrutura</SelectItem>
+                                    <SelectItem value="Marketing">Marketing</SelectItem>
+                                    <SelectItem value="Operação">Operação</SelectItem>
+                                    <SelectItem value="Pessoal">Pessoal</SelectItem>
+                                    <SelectItem value="Impostos">Impostos</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="val" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Valor (R$)</Label>
-                            <Input id="val" type="number" step="0.01" placeholder="0,00" className="h-12 rounded-xl bg-muted/30 border-border/40 font-mono" />
+                            <Input
+                                id="val"
+                                type="text"
+                                placeholder="0,00"
+                                value={form.valor}
+                                onChange={e => setForm(f => ({ ...f, valor: e.target.value }))}
+                                className="h-12 rounded-xl bg-muted/30 border-border/40 font-mono"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="rec" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Recorrência</Label>
-                            <Select defaultValue="PONTUAL">
+                            <Select value={form.recorrencia} onValueChange={v => setForm(f => ({ ...f, recorrencia: v }))}>
                                 <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40">
                                     <SelectValue />
                                 </SelectTrigger>
@@ -407,11 +421,42 @@ export function FinanceView() {
                         <Button
                             variant="destructive"
                             className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-error/20"
-                            onClick={() => {
-                                toast.success("Lançamento registrado com sucesso!");
-                                setIsNewRecordOpen(false);
+                            disabled={saving || !form.descricao || !form.valor}
+                            onClick={async () => {
+                                setSaving(true);
+                                try {
+                                    const parsedValor = parseFloat(form.valor.replace(',', '.'));
+                                    if (isNaN(parsedValor)) throw new Error("Valor inválido.");
+
+                                    await create({
+                                        tipo: activeSubTab,
+                                        status: form.status as any,
+                                        data: form.data,
+                                        valor: parsedValor,
+                                        categoria: form.categoria || "Geral",
+                                        subcategoria: form.subcategoria || "Outros",
+                                        responsavel: form.responsavel,
+                                        descricao: form.descricao,
+                                        origem: "MANUAL",
+                                        recorrencia: form.recorrencia as any,
+                                        parcelas: parseInt(form.parcelas) || 1
+                                    });
+
+                                    toast.success("Lançamento registrado com sucesso!");
+                                    setIsNewRecordOpen(false);
+                                    setForm({
+                                        descricao: "", categoria: "", valor: "", responsavel: "Financeiro",
+                                        data: new Date().toISOString().slice(0, 10), status: "PREVISTO",
+                                        recorrencia: "PONTUAL", parcelas: "1", subcategoria: ""
+                                    });
+                                } catch (e: any) {
+                                    toast.error(`Erro: ${e.message}`);
+                                } finally {
+                                    setSaving(false);
+                                }
                             }}
                         >
+                            {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : null}
                             Salvar Transação
                         </Button>
                     </DialogFooter>

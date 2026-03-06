@@ -78,12 +78,12 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
     const transactions = data?.transactions || [];
     const meetings = data?.meetings || [];
 
-    // Dynamic aggregation for Revenue Origin
+    // Dynamic aggregation for Revenue Origin (Include ALL Approved Revenue)
     const originStats = transactions
         .filter(t => t.tipo === 'RECEITA' && t.status === 'APROVADO')
         .reduce((acc, curr) => {
-            const origin = curr.origem || 'OUTRO';
-            acc[origin] = (acc[origin] || 0) + curr.valor;
+            const origin = (curr.origem || 'OUTRO').toUpperCase();
+            acc[origin] = (acc[origin] || 0) + Number(curr.valor);
             return acc;
         }, {} as Record<string, number>);
 

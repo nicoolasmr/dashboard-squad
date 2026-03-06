@@ -44,7 +44,9 @@ export function Navbar({ onRefresh, onNewSale, onNewExpense, onNewMeeting, onSet
     };
 
     const toggleTVMode = () => {
-        window.open("/?tv=1", "_blank");
+        // Use full URL to avoid potential relative path issues on Vercel
+        const url = window.location.origin + "/?tv=1";
+        window.open(url, "_blank");
     };
 
     return (

@@ -294,31 +294,71 @@ export function MeetingsView() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <form className="flex flex-col gap-6 my-8 pointer-events-auto" onSubmit={(e) => {
-                        e.preventDefault();
-                        toast.success("Evento sincronizado com o dashboard!");
-                        setIsNewMeetingOpen(false);
-                    }}>
+                    <form
+                        className="flex flex-col gap-6 my-8 pointer-events-auto"
+                        onSubmit={async (e) => {
+                            e.preventDefault();
+                            setSaving(true);
+                            try {
+                                if (!form.titulo || !form.cliente || !form.data_hora) {
+                                    throw new Error("Preencha todos os campos obrigatórios.");
+                                }
+                                await create({
+                                    titulo: form.titulo,
+                                    cliente: form.cliente,
+                                    owner: form.owner || "Nicolas Moreira",
+                                    data_hora: form.data_hora,
+                                    canal: form.canal as any,
+                                    notas: form.notas,
+                                    status: "MARCADA"
+                                });
+                                toast.success("Evento sincronizado com o dashboard!");
+                                setIsNewMeetingOpen(false);
+                                setForm({
+                                    titulo: "", cliente: "", owner: "",
+                                    data_hora: "", canal: "ZOOM", notas: ""
+                                });
+                            } catch (err: any) {
+                                toast.error(`Erro: ${err.message}`);
+                            } finally {
+                                setSaving(false);
+                            }
+                        }}
+                    >
                         <div className="space-y-2">
                             <Label htmlFor="title" className="text-[10px] uppercase font-bold text-muted-foreground ml-1 tracking-widest leading-none">Título do Compromisso</Label>
-                            <Input id="title" required placeholder="Ex: Call de Alinhamento Estratégico" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Input
+                                id="title"
+                                required
+                                placeholder="Ex: Call de Alinhamento Estratégico"
+                                value={form.titulo}
+                                onChange={e => setForm(f => ({ ...f, titulo: e.target.value }))}
+                                className="h-12 rounded-xl bg-muted/30 border-border/40"
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="client" className="text-[10px] uppercase font-bold text-muted-foreground ml-1 tracking-widest leading-none">Cliente</Label>
-                                <Input id="client" required placeholder="Nome do Lead/Empresa" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                                <Input
+                                    id="client"
+                                    required
+                                    placeholder="Nome do Lead/Empresa"
+                                    value={form.cliente}
+                                    onChange={e => setForm(f => ({ ...f, cliente: e.target.value }))}
+                                    className="h-12 rounded-xl bg-muted/30 border-border/40"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="owner" className="text-[10px] uppercase font-bold text-muted-foreground ml-1 tracking-widest leading-none">Owner (Responsável)</Label>
-                                <Select>
+                                <Select value={form.owner} onValueChange={v => setForm(f => ({ ...f, owner: v }))}>
                                     <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40">
                                         <SelectValue placeholder="Selecione..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="nic">Nicolas Moreira</SelectItem>
-                                        <SelectItem value="mar">Maria Silva</SelectItem>
-                                        <SelectItem value="jon">João Santos</SelectItem>
+                                        <SelectItem value="Nicolas Moreira">Nicolas Moreira</SelectItem>
+                                        <SelectItem value="Maria Silva">Maria Silva</SelectItem>
+                                        <SelectItem value="João Santos">João Santos</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -327,11 +367,18 @@ export function MeetingsView() {
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="time" className="text-[10px] uppercase font-bold text-muted-foreground ml-1 tracking-widest leading-none">Data e Horário</Label>
-                                <Input id="time" required type="datetime-local" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                                <Input
+                                    id="time"
+                                    required
+                                    type="datetime-local"
+                                    value={form.data_hora}
+                                    onChange={e => setForm(f => ({ ...f, data_hora: e.target.value }))}
+                                    className="h-12 rounded-xl bg-muted/30 border-border/40"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="chan" className="text-[10px] uppercase font-bold text-muted-foreground ml-1 tracking-widest leading-none">Canal</Label>
-                                <Select>
+                                <Select value={form.canal} onValueChange={v => setForm(f => ({ ...f, canal: v }))}>
                                     <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40">
                                         <SelectValue placeholder="Escolha..." />
                                     </SelectTrigger>
@@ -347,14 +394,26 @@ export function MeetingsView() {
 
                         <div className="space-y-2">
                             <Label htmlFor="notes" className="text-[10px] uppercase font-bold text-muted-foreground ml-1 tracking-widest leading-none">Pauta / Notas</Label>
-                            <Textarea id="notes" rows={3} placeholder="O que será discutido?" className="rounded-xl bg-muted/30 border-border/40 resize-none p-4" />
+                            <Textarea
+                                id="notes"
+                                rows={3}
+                                placeholder="O que será discutido?"
+                                value={form.notas}
+                                onChange={e => setForm(f => ({ ...f, notas: e.target.value }))}
+                                className="rounded-xl bg-muted/30 border-border/40 resize-none p-4"
+                            />
                         </div>
 
                         <DialogFooter className="mt-4 gap-3">
                             <Button variant="ghost" type="button" onClick={() => setIsNewMeetingOpen(false)} className="rounded-xl font-bold h-12">
                                 Cancelar
                             </Button>
-                            <Button type="submit" className="rounded-xl font-bold h-12 px-10 bg-success hover:bg-success/90">
+                            <Button
+                                type="submit"
+                                className="rounded-xl font-bold h-12 px-10 bg-success hover:bg-success/90"
+                                disabled={saving}
+                            >
+                                {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : null}
                                 Confirmar Agendamento
                             </Button>
                         </DialogFooter>
