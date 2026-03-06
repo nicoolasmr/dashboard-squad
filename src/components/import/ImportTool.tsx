@@ -12,6 +12,8 @@ import {
     Table as TableIcon
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+import { Transaction } from "@/types/dashboard";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -26,6 +28,7 @@ export function ImportView() {
     const [rawData, setRawData] = useState<any[]>([]);
     const [headers, setHeaders] = useState<string[]>([]);
     const [mapping, setMapping] = useState<Record<string, string>>({});
+    const [isImporting, setIsImporting] = useState(false);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -245,16 +248,51 @@ export function ImportView() {
                             <div className="mt-auto flex justify-between items-center pt-6 border-t border-border">
                                 <button onClick={() => setStep(2)} className="font-bold text-muted-foreground hover:text-foreground">Recalibrar Mapeamento</button>
                                 <button
-                                    onClick={() => {
+                                    disabled={isImporting}
+                                    onClick={async () => {
+                                        setIsImporting(true);
                                         toast.info(`Iniciando importação de ${rawData.length} itens...`);
-                                        setTimeout(() => {
+
+                                        try {
+                                            const formattedData = rawData.map(row => {
+                                                const rawValue = String(row[mapping['valor']] || "0").replace(/\./g, '').replace(',', '.');
+                                                const parsedValor = parseFloat(rawValue);
+
+                                                const data = {
+                                                    tipo: importType === 'VENDAS' ? 'RECEITA' : 'DESPESA',
+                                                    status: (row[mapping['status']] || 'APROVADO').toUpperCase(),
+                                                    valor: isNaN(parsedValor) ? 0 : parsedValor,
+                                                    data: row[mapping['data']] || new Date().toISOString().slice(0, 10),
+                                                    origem: (importType === 'VENDAS' ? 'PLANILHA' : 'MANUAL') as Transaction['origem'],
+                                                    categoria: importType === 'VENDAS' ? 'Venda' : (row[mapping['categoria']] || 'Geral'),
+                                                    produto: row[mapping['produto']] || null,
+                                                    nome: row[mapping['nome']] || row[mapping['cliente']] || null,
+                                                    email: row[mapping['email']] || null,
+                                                    descricao: row[mapping['descricao']] || `Importação ${importType}`,
+                                                    responsavel: 'Sistema',
+                                                };
+                                                return data;
+                                            });
+
+                                            const { error } = await supabase.from('transactions').insert(formattedData);
+
+                                            if (error) throw error;
+
                                             setStep(4);
                                             toast.success("Importação concluída com sucesso!");
-                                        }, 2000);
+                                        } catch (e: any) {
+                                            console.error("Import error:", e);
+                                            toast.error(`Falha na importação: ${e.message}`);
+                                        } finally {
+                                            setIsImporting(false);
+                                        }
                                     }}
-                                    className="bg-success text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-success/20 flex items-center gap-2"
+                                    className={cn(
+                                        "bg-success text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-success/20 flex items-center gap-2",
+                                        isImporting && "opacity-50 cursor-not-allowed"
+                                    )}
                                 >
-                                    Importar Agora
+                                    {isImporting ? "Processando..." : "Importar Agora"}
                                     <Database size={18} />
                                 </button>
                             </div>
