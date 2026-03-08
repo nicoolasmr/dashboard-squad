@@ -37,7 +37,7 @@ import { toast } from "sonner";
 
 export function FinanceView() {
     const [activeSubTab, setActiveSubTab] = useState<'DESPESA' | 'CUSTO'>('DESPESA');
-    const { data: allData, loading, create } = useTransactions();
+    const { data: allData, loading, create, update, remove } = useTransactions();
     const currentMes = new Date().toISOString().slice(0, 7);
     const { goal } = useGoals(currentMes);
     const [isNewRecordOpen, setIsNewRecordOpen] = useState(false);
@@ -397,20 +397,37 @@ export function FinanceView() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="rec" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Recorrência</Label>
-                            <Select value={form.recorrencia} onValueChange={v => setForm(f => ({ ...f, recorrencia: v }))}>
-                                <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40">
+                            <Label htmlFor="sub" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Subcategoria</Label>
+                            <Input
+                                id="sub"
+                                placeholder="Ex: Assinatura, Imposto..."
+                                value={form.subcategoria}
+                                onChange={e => setForm(f => ({ ...f, subcategoria: e.target.value }))}
+                                className="h-12 rounded-xl bg-muted/30 border-border/40"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="stat" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Status do Gasto</Label>
+                            <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40 font-bold uppercase text-[10px]">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="PONTUAL">Pontual</SelectItem>
-                                    <SelectItem value="RECORRENTE">Recorrente</SelectItem>
+                                    <SelectItem value="PREVISTO">Previsto</SelectItem>
+                                    <SelectItem value="PAGO">Pago</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="parc" className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Nº de Repetições</Label>
-                            <Input id="parc" type="number" placeholder="1" className="h-12 rounded-xl bg-muted/30 border-border/40" />
+                            <Input
+                                id="parc"
+                                type="number"
+                                placeholder="1"
+                                value={form.parcelas}
+                                onChange={e => setForm(f => ({ ...f, parcelas: e.target.value }))}
+                                className="h-12 rounded-xl bg-muted/30 border-border/40"
+                            />
                         </div>
                     </div>
 
@@ -442,6 +459,9 @@ export function FinanceView() {
                                         parcelas: parseInt(form.parcelas) || 1
                                     });
 
+                                    // Explicit refresh to ensure UI updates
+                                    // However, useTransactions already has a real-time listener.
+                                    // If it's not working, it might be due to session/filters.
                                     toast.success("Lançamento registrado com sucesso!");
                                     setIsNewRecordOpen(false);
                                     setForm({
@@ -484,7 +504,8 @@ export function FinanceView() {
                                 </div>
                                 {isEditing ? (
                                     <Input
-                                        defaultValue={selectedRecord.descricao}
+                                        value={selectedRecord.descricao}
+                                        onChange={e => setSelectedRecord(r => r ? { ...r, descricao: e.target.value } : null)}
                                         className="text-2xl font-bold bg-transparent border-none focus-visible:ring-offset-0 focus-visible:ring-1 italic p-0"
                                     />
                                 ) : (
@@ -502,7 +523,10 @@ export function FinanceView() {
                                             <Tag size={12} className="inline mr-1" /> Categoria
                                         </p>
                                         {isEditing ? (
-                                            <Select defaultValue={selectedRecord.categoria}>
+                                            <Select
+                                                value={selectedRecord.categoria}
+                                                onValueChange={v => setSelectedRecord(r => r ? { ...r, categoria: v } : null)}
+                                            >
                                                 <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-none font-bold">
                                                     <SelectValue />
                                                 </SelectTrigger>
@@ -526,7 +550,8 @@ export function FinanceView() {
                                         {isEditing ? (
                                             <Input
                                                 type="number"
-                                                defaultValue={selectedRecord.valor}
+                                                value={selectedRecord.valor}
+                                                onChange={e => setSelectedRecord(r => r ? { ...r, valor: parseFloat(e.target.value) || 0 } : null)}
                                                 className="text-right font-bold text-2xl text-error bg-transparent border-none p-0 h-auto"
                                             />
                                         ) : (
@@ -538,7 +563,12 @@ export function FinanceView() {
                                             <Calendar size={12} className="inline mr-1" /> {isEditing ? "Alterar Data" : "Data do Lançamento"}
                                         </p>
                                         {isEditing ? (
-                                            <Input type="date" defaultValue={selectedRecord.data} className="h-10 rounded-xl bg-muted/40 border-none" />
+                                            <Input
+                                                type="date"
+                                                value={selectedRecord.data}
+                                                onChange={e => setSelectedRecord(r => r ? { ...r, data: e.target.value } : null)}
+                                                className="h-10 rounded-xl bg-muted/40 border-none"
+                                            />
                                         ) : (
                                             <p className="font-medium">{formatDate(selectedRecord.data)}</p>
                                         )}
@@ -548,7 +578,10 @@ export function FinanceView() {
                                             <TrendingUp size={12} className="inline mr-1" /> Recorrência
                                         </p>
                                         {isEditing ? (
-                                            <Select defaultValue={selectedRecord.recorrencia || "PONTUAL"}>
+                                            <Select
+                                                value={selectedRecord.recorrencia || "PONTUAL"}
+                                                onValueChange={v => setSelectedRecord(r => r ? { ...r, recorrencia: v as any } : null)}
+                                            >
                                                 <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-none font-bold">
                                                     <SelectValue />
                                                 </SelectTrigger>
@@ -578,11 +611,27 @@ export function FinanceView() {
                                             <Button
                                                 variant="destructive"
                                                 className="flex-1 h-12 rounded-xl font-bold px-8 shadow-lg shadow-error/20"
-                                                onClick={() => {
-                                                    toast.success("Alterações salvas com sucesso!");
-                                                    setIsEditing(false);
+                                                disabled={saving}
+                                                onClick={async () => {
+                                                    setSaving(true);
+                                                    try {
+                                                        await update(selectedRecord.id, {
+                                                            descricao: selectedRecord.descricao,
+                                                            categoria: selectedRecord.categoria,
+                                                            valor: selectedRecord.valor,
+                                                            data: selectedRecord.data,
+                                                            recorrencia: selectedRecord.recorrencia
+                                                        });
+                                                        toast.success("Alterações salvas com sucesso!");
+                                                        setIsEditing(false);
+                                                    } catch (e: any) {
+                                                        toast.error(`Erro ao salvar: ${e.message}`);
+                                                    } finally {
+                                                        setSaving(false);
+                                                    }
                                                 }}
                                             >
+                                                {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : null}
                                                 Salvar Alterações
                                             </Button>
                                         </>
@@ -598,9 +647,20 @@ export function FinanceView() {
                                             <Button
                                                 variant="destructive"
                                                 className="w-12 h-12 rounded-xl font-bold p-0 flex items-center justify-center border-border/60"
-                                                onClick={() => {
-                                                    toast.error("Gasto excluído permanentemente.");
-                                                    setSelectedRecord(null);
+                                                disabled={saving}
+                                                onClick={async () => {
+                                                    if (confirm("Tem certeza que deseja excluir?")) {
+                                                        setSaving(true);
+                                                        try {
+                                                            await remove(selectedRecord.id);
+                                                            toast.error("Gasto excluído permanentemente.");
+                                                            setSelectedRecord(null);
+                                                        } catch (e: any) {
+                                                            toast.error(`Erro ao excluir: ${e.message}`);
+                                                        } finally {
+                                                            setSaving(false);
+                                                        }
+                                                    }
                                                 }}
                                                 title="Excluir Gasto"
                                             >

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { DashboardData } from "@/types/dashboard";
-import { TrendingUp, DollarSign, BarChart3, Clock, RefreshCw, X, Maximize2, Zap, Activity } from "lucide-react";
+import { TrendingUp, DollarSign, BarChart3, Clock, RefreshCw, X, Maximize2, Zap, Activity, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -216,17 +216,76 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                         </motion.div>
                     )}
 
-                    {activeView > 0 && (
+                    {activeView === 1 && (
                         <motion.div
-                            key="placeholder"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex flex-col items-center justify-center flex-grow bg-white/5 rounded-[4rem] border border-white/10 mb-12 border-dashed"
+                            key="sales"
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -50 }}
+                            transition={{ duration: 0.8 }}
+                            className="flex-grow flex flex-col gap-12"
                         >
-                            <div className="text-center space-y-8">
-                                <div className="w-32 h-32 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto pb-4" />
-                                <h3 className="text-6xl font-black italic tracking-tighter opacity-20 uppercase">Decoding {views[activeView]} Data...</h3>
-                                <p className="text-white/10 font-mono tracking-widest text-sm uppercase">Accessing secure endpoint: /api/v1/metrics/{views[activeView].toLowerCase().replace(' ', '-')}</p>
+                            <div className="grid grid-cols-2 gap-12 flex-grow mb-12">
+                                <div className="bg-white/5 p-16 rounded-[4rem] border border-white/10 flex flex-col justify-center">
+                                    <p className="text-4xl font-black text-white/40 uppercase tracking-[0.4em] mb-12 flex items-center gap-4">
+                                        <ShoppingCart className="text-primary" size={40} />
+                                        Total Pipeline
+                                    </p>
+                                    <h2 className="text-[12rem] font-black tracking-tighter leading-none">
+                                        {formatCurrency(kpis?.receita_total || 0).split(',')[0]}
+                                    </h2>
+                                    <p className="text-4xl font-bold text-white/20 mt-4 italic uppercase">Potential Projected Volume</p>
+                                </div>
+                                <div className="bg-white/5 p-16 rounded-[4rem] border border-white/10 flex flex-col justify-center">
+                                    <p className="text-4xl font-black text-white/40 uppercase tracking-[0.4em] mb-12 flex items-center gap-4">
+                                        <TrendingUp className="text-success" size={40} />
+                                        Conversion Target
+                                    </p>
+                                    <div className="flex items-baseline gap-6">
+                                        <h2 className="text-[12rem] font-black tracking-tighter leading-none text-success">
+                                            {pct}%
+                                        </h2>
+                                        <span className="text-4xl font-bold text-white/20">/ MONTH</span>
+                                    </div>
+                                    <div className="mt-8 h-4 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-success shadow-[0_0_20px_rgba(16,185,129,0.5)]" style={{ width: `${pct}%` }} />
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeView === 2 && (
+                        <motion.div
+                            key="finance"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.05 }}
+                            transition={{ duration: 0.8 }}
+                            className="flex-grow flex flex-col gap-12"
+                        >
+                            <div className="grid grid-cols-3 gap-12 flex-grow mb-12">
+                                <div className="bg-white/5 p-12 rounded-[4rem] border border-white/10 flex flex-col justify-between">
+                                    <p className="text-2xl font-black text-white/40 uppercase tracking-[0.4em]">Settled OpEx</p>
+                                    <h3 className="text-7xl font-black text-error">
+                                        {formatCurrency(kpis?.despesas_total || 0)}
+                                    </h3>
+                                    <p className="text-sm font-mono text-white/10">BURN_READY_0x42f</p>
+                                </div>
+                                <div className="bg-white/5 p-12 rounded-[4rem] border border-white/10 flex flex-col justify-between">
+                                    <p className="text-2xl font-black text-white/40 uppercase tracking-[0.4em]">Operating Costs</p>
+                                    <h3 className="text-7xl font-black text-warning">
+                                        {formatCurrency(kpis?.custos_total || 0)}
+                                    </h3>
+                                    <p className="text-sm font-mono text-white/10">MARGIN_BUFFER_SAFE</p>
+                                </div>
+                                <div className="bg-white/5 p-12 rounded-[4rem] border border-primary/20 flex flex-col justify-between shadow-[inset_0_0_100px_rgba(0,102,255,0.05)]">
+                                    <p className="text-2xl font-black text-primary/80 uppercase tracking-[0.4em]">Net Yield</p>
+                                    <h3 className="text-7xl font-black text-white">
+                                        {formatCurrency(kpis?.lucro || 0)}
+                                    </h3>
+                                    <p className="text-sm font-mono text-primary/40 animate-pulse">PROFIT_EXECUTION_STABLE</p>
+                                </div>
                             </div>
                         </motion.div>
                     )}

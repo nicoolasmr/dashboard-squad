@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Search, Filter, Calendar, Clock, Video, User, CheckCircle2, XCircle, RotateCcw, MoreHorizontal, MapPin, MessageSquare, LayoutGrid, List, Loader2 } from "lucide-react";
+import { Plus, Search, Filter, Calendar, Clock, Video, User, CheckCircle2, XCircle, RotateCcw, MoreHorizontal, MapPin, MessageSquare, LayoutGrid, List, Loader2, X, Trash2 } from "lucide-react";
 import { useMeetings } from "@/hooks/useMeetings";
 import { GanttChart } from "./GanttChart";
 import { DataTable } from "@/components/ui/data-table";
@@ -31,11 +31,12 @@ import { formatDateTime, cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function MeetingsView() {
-    const { data, loading, create } = useMeetings();
+    const [saving, setSaving] = useState(false);
+    const { data, loading, create, update, remove } = useMeetings();
     const [isNewMeetingOpen, setIsNewMeetingOpen] = useState(false);
     const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
     const [search, setSearch] = useState("");
-    const [saving, setSaving] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const [form, setForm] = useState({
         titulo: "", cliente: "", owner: "",
         data_hora: "", canal: "ZOOM", notas: ""
@@ -120,7 +121,6 @@ export function MeetingsView() {
         return matchesSearch && matchesStatus && matchesChannel;
     });
 
-    const [isEditing, setIsEditing] = useState(false);
     const [viewMode, setViewMode] = useState<"TABLE" | "GANTT">("TABLE");
     // Map meetings to Gantt format
     const ganttData = filteredData.map(m => {
@@ -432,25 +432,53 @@ export function MeetingsView() {
                     {selectedMeeting && (
                         <>
                             <div className="bg-primary/5 p-10 pb-14 relative border-b border-primary/10">
-                                <div className="absolute top-10 right-10">
-                                    <Badge variant="primary" className="rounded-xl px-4 py-1.5 font-bold uppercase tracking-wider border-none text-[10px] shadow-lg shadow-primary/10">
-                                        {selectedMeeting.status}
-                                    </Badge>
+                                <div className="absolute top-10 right-10 flex gap-2">
+                                    {isEditing ? (
+                                        <Select
+                                            defaultValue={selectedMeeting.status}
+                                            onValueChange={v => setSelectedMeeting(m => m ? { ...m, status: v as any } : null)}
+                                        >
+                                            <SelectTrigger className="h-9 w-32 rounded-lg bg-muted/40 border-none font-bold text-[10px] uppercase">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="MARCADA">Marcada</SelectItem>
+                                                <SelectItem value="FEITA">Feita</SelectItem>
+                                                <SelectItem value="NO_SHOW">No Show</SelectItem>
+                                                <SelectItem value="CANCELADA">Cancelada</SelectItem>
+                                                <SelectItem value="REMARCADA">Remarcada</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    ) : (
+                                        <Badge variant="primary" className="rounded-xl px-4 py-1.5 font-bold uppercase tracking-wider border-none text-[10px] shadow-lg shadow-primary/10">
+                                            {selectedMeeting.status}
+                                        </Badge>
+                                    )}
                                 </div>
                                 <div className="w-16 h-16 bg-primary/10 text-primary rounded-[1.5rem] flex items-center justify-center mb-8">
                                     {selectedMeeting.canal === 'ZOOM' || selectedMeeting.canal === 'MEET' ? <Video size={36} /> : <User size={36} />}
                                 </div>
                                 {isEditing ? (
                                     <Input
-                                        defaultValue={selectedMeeting.titulo}
+                                        value={selectedMeeting.titulo}
+                                        onChange={e => setSelectedMeeting(m => m ? { ...m, titulo: e.target.value } : null)}
                                         className="text-3xl font-bold bg-transparent border-none focus-visible:ring-offset-0 focus-visible:ring-1 p-0 h-auto"
                                     />
                                 ) : (
                                     <h2 className="text-3xl font-bold text-foreground leading-[1.1] mb-2">{selectedMeeting.titulo}</h2>
                                 )}
-                                <p className="text-muted-foreground font-semibold flex items-center gap-2 italic">
-                                    com <span className="text-foreground not-italic">{selectedMeeting.cliente}</span>
-                                </p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-muted-foreground font-semibold italic">com</p>
+                                    {isEditing ? (
+                                        <Input
+                                            value={selectedMeeting.cliente}
+                                            onChange={e => setSelectedMeeting(m => m ? { ...m, cliente: e.target.value } : null)}
+                                            className="h-8 w-48 bg-muted/40 border-none font-bold text-sm"
+                                        />
+                                    ) : (
+                                        <p className="text-foreground font-bold not-italic">{selectedMeeting.cliente}</p>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="p-10 bg-card relative z-10 space-y-10 rounded-t-[2.5rem] -mt-6 shadow-2xl">
@@ -460,7 +488,12 @@ export function MeetingsView() {
                                             <Calendar size={12} className="text-primary" /> {isEditing ? "Nova Data" : "Data e Horário"}
                                         </p>
                                         {isEditing ? (
-                                            <Input type="datetime-local" defaultValue={selectedMeeting.data_hora} className="h-10 rounded-xl bg-muted/40 border-none font-bold" />
+                                            <Input
+                                                type="datetime-local"
+                                                value={selectedMeeting.data_hora}
+                                                onChange={e => setSelectedMeeting(m => m ? { ...m, data_hora: e.target.value } : null)}
+                                                className="h-10 rounded-xl bg-muted/40 border-none font-bold"
+                                            />
                                         ) : (
                                             <p className="font-bold text-lg">{formatDateTime(selectedMeeting.data_hora)}</p>
                                         )}
@@ -476,7 +509,11 @@ export function MeetingsView() {
                                             <User size={12} className="text-primary" /> Gestor Responsável
                                         </p>
                                         {isEditing ? (
-                                            <Input defaultValue={selectedMeeting.owner} className="h-10 rounded-xl bg-muted/40 border-none font-bold" />
+                                            <Input
+                                                value={selectedMeeting.owner}
+                                                onChange={e => setSelectedMeeting(m => m ? { ...m, owner: e.target.value } : null)}
+                                                className="h-10 rounded-xl bg-muted/40 border-none font-bold"
+                                            />
                                         ) : (
                                             <p className="font-bold text-lg">{selectedMeeting.owner}</p>
                                         )}
@@ -493,7 +530,12 @@ export function MeetingsView() {
                                     <div className="pt-8 border-t border-border/40">
                                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.2em] mb-4">Briefing & Contexto</p>
                                         {isEditing ? (
-                                            <Textarea defaultValue={selectedMeeting.notas} className="rounded-xl bg-muted/30 border-border/40" rows={3} />
+                                            <Textarea
+                                                value={selectedMeeting.notas}
+                                                onChange={e => setSelectedMeeting(m => m ? { ...m, notas: e.target.value } : null)}
+                                                className="rounded-xl bg-muted/30 border-border/40"
+                                                rows={3}
+                                            />
                                         ) : (
                                             <div className="bg-muted/30 p-6 rounded-[1.5rem] border border-border/30 text-sm font-medium text-foreground/80 leading-relaxed italic">
                                                 "{selectedMeeting.notas}"
@@ -514,11 +556,28 @@ export function MeetingsView() {
                                             </Button>
                                             <Button
                                                 className="flex-1 h-14 rounded-2xl font-bold bg-success hover:bg-success/90 shadow-lg shadow-success/20"
-                                                onClick={() => {
-                                                    toast.success("Reunião atualizada com sucesso!");
-                                                    setIsEditing(false);
+                                                disabled={saving}
+                                                onClick={async () => {
+                                                    setSaving(true);
+                                                    try {
+                                                        await update(selectedMeeting.id, {
+                                                            titulo: selectedMeeting.titulo,
+                                                            cliente: selectedMeeting.cliente,
+                                                            owner: selectedMeeting.owner,
+                                                            data_hora: selectedMeeting.data_hora,
+                                                            notas: selectedMeeting.notas,
+                                                            status: selectedMeeting.status
+                                                        });
+                                                        toast.success("Reunião atualizada com sucesso!");
+                                                        setIsEditing(false);
+                                                    } catch (e: any) {
+                                                        toast.error(`Erro ao atualizar: ${e.message}`);
+                                                    } finally {
+                                                        setSaving(false);
+                                                    }
                                                 }}
                                             >
+                                                {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : null}
                                                 Salvar Alterações
                                             </Button>
                                         </>
@@ -526,19 +585,32 @@ export function MeetingsView() {
                                         <>
                                             <Button
                                                 variant="outline"
-                                                className="flex-1 h-14 rounded-2xl font-bold border-border/60 hover:bg-muted/50"
+                                                className="flex-1 h-14 rounded-2xl font-bold border-border/60"
                                                 onClick={() => setIsEditing(true)}
                                             >
-                                                Editar Reunião
+                                                Editar Dados
                                             </Button>
                                             <Button
-                                                className="flex-1 h-14 rounded-2xl font-bold bg-success hover:bg-success/90 shadow-lg shadow-success/20 border-none"
-                                                onClick={() => {
-                                                    toast.success("Reunião marcada como concluída!");
-                                                    setSelectedMeeting(null);
+                                                variant="destructive"
+                                                className="w-14 h-14 rounded-2xl font-bold p-0 flex items-center justify-center border-border/60"
+                                                disabled={saving}
+                                                onClick={async () => {
+                                                    if (confirm("Tem certeza que deseja excluir esta reunião?")) {
+                                                        setSaving(true);
+                                                        try {
+                                                            await remove(selectedMeeting.id);
+                                                            toast.error("Reunião excluída permanentemente.");
+                                                            setSelectedMeeting(null);
+                                                        } catch (e: any) {
+                                                            toast.error(`Erro ao excluir: ${e.message}`);
+                                                        } finally {
+                                                            setSaving(false);
+                                                        }
+                                                    }
                                                 }}
+                                                title="Excluir Reunião"
                                             >
-                                                Concluir Reunião
+                                                <X size={24} />
                                             </Button>
                                         </>
                                     )}
