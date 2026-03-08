@@ -573,27 +573,45 @@ export function FinanceView() {
                                             <p className="font-medium">{formatDate(selectedRecord.data)}</p>
                                         )}
                                     </div>
-                                    <div className="space-y-1 text-right">
-                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1.5 justify-end flex items-center">
-                                            <TrendingUp size={12} className="inline mr-1" /> Recorrência
-                                        </p>
+                                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1.5 justify-end flex items-center">
+                                        <TrendingUp size={12} className="inline mr-1" /> Recorrência / Origem
+                                    </p>
+                                    <div className="flex flex-col items-end gap-1">
                                         {isEditing ? (
-                                            <Select
-                                                value={selectedRecord.recorrencia || "PONTUAL"}
-                                                onValueChange={v => setSelectedRecord(r => r ? { ...r, recorrencia: v as any } : null)}
-                                            >
-                                                <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-none font-bold">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="PONTUAL">Pontual</SelectItem>
-                                                    <SelectItem value="RECORRENTE">Recorrente</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                            <div className="flex flex-col gap-2">
+                                                <Select
+                                                    value={selectedRecord.recorrencia || "PONTUAL"}
+                                                    onValueChange={v => setSelectedRecord(r => r ? { ...r, recorrencia: v as any } : null)}
+                                                >
+                                                    <SelectTrigger className="h-9 w-32 rounded-lg bg-muted/40 border-none font-bold text-[10px] uppercase">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="PONTUAL">Pontual</SelectItem>
+                                                        <SelectItem value="RECORRENTE">Recorrente</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <Select
+                                                    value={selectedRecord.origem}
+                                                    onValueChange={v => setSelectedRecord(r => r ? { ...r, origem: v as any } : null)}
+                                                >
+                                                    <SelectTrigger className="h-9 w-32 rounded-lg bg-muted/40 border-none font-bold text-[10px] uppercase">
+                                                        <SelectValue placeholder="Origem" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="MANUAL">Manual</SelectItem>
+                                                        <SelectItem value="ASAAS">Asaas</SelectItem>
+                                                        <SelectItem value="KIWIFY">Kiwify</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         ) : (
-                                            <p className="font-medium text-foreground">
-                                                {selectedRecord.recorrencia === 'RECORRENTE' ? `${selectedRecord.parcelas}x ${selectedRecord.recorrencia_periodo}` : "Pontual"}
-                                            </p>
+                                            <>
+                                                <p className="font-medium text-foreground">
+                                                    {selectedRecord.recorrencia === 'RECORRENTE' ? `${selectedRecord.parcelas}x ${selectedRecord.recorrencia_periodo}` : "Pontual"}
+                                                </p>
+                                                <p className="font-medium text-[10px] opacity-70 italic uppercase tracking-widest">{selectedRecord.origem}</p>
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -620,7 +638,8 @@ export function FinanceView() {
                                                             categoria: selectedRecord.categoria,
                                                             valor: selectedRecord.valor,
                                                             data: selectedRecord.data,
-                                                            recorrencia: selectedRecord.recorrencia
+                                                            recorrencia: selectedRecord.recorrencia,
+                                                            origem: selectedRecord.origem
                                                         });
                                                         toast.success("Alterações salvas com sucesso!");
                                                         setIsEditing(false);

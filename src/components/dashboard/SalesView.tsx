@@ -323,6 +323,7 @@ export function SalesView() {
                                     <SelectItem value="KIWIFY">Kiwify</SelectItem>
                                     <SelectItem value="HOTMART">Hotmart</SelectItem>
                                     <SelectItem value="STRIPE">Stripe</SelectItem>
+                                    <SelectItem value="ASAAS">Asaas</SelectItem>
                                     <SelectItem value="MANUAL">Lançamento Manual</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -469,23 +470,39 @@ export function SalesView() {
                                         </p>
                                         <div className="flex flex-col items-end gap-1">
                                             {isEditing ? (
-                                                <Select defaultValue={selectedSale.status} onValueChange={v => setSelectedSale(s => s ? { ...s, status: v as any } : null)}>
-                                                    <SelectTrigger className="h-9 w-32 rounded-lg bg-muted/40 border-none font-bold text-[10px] uppercase">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="APROVADO">Aprovado</SelectItem>
-                                                        <SelectItem value="PENDENTE">Pendente</SelectItem>
-                                                        <SelectItem value="CANCELADO">Cancelado</SelectItem>
-                                                        <SelectItem value="REEMBOLSADO">Reembolsado</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                                <div className="flex flex-col gap-2">
+                                                    <Select defaultValue={selectedSale.status} onValueChange={v => setSelectedSale(s => s ? { ...s, status: v as any } : null)}>
+                                                        <SelectTrigger className="h-9 w-32 rounded-lg bg-muted/40 border-none font-bold text-[10px] uppercase">
+                                                            <SelectValue placeholder="Status" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="APROVADO">Aprovado</SelectItem>
+                                                            <SelectItem value="PENDENTE">Pendente</SelectItem>
+                                                            <SelectItem value="CANCELADO">Cancelado</SelectItem>
+                                                            <SelectItem value="REEMBOLSADO">Reembolsado</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <Select defaultValue={selectedSale.origem} onValueChange={v => setSelectedSale(s => s ? { ...s, origem: v as any } : null)}>
+                                                        <SelectTrigger className="h-9 w-32 rounded-lg bg-muted/40 border-none font-bold text-[10px] uppercase">
+                                                            <SelectValue placeholder="Origem" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="KIWIFY">Kiwify</SelectItem>
+                                                            <SelectItem value="HOTMART">Hotmart</SelectItem>
+                                                            <SelectItem value="STRIPE">Stripe</SelectItem>
+                                                            <SelectItem value="ASAAS">Asaas</SelectItem>
+                                                            <SelectItem value="MANUAL">Manual</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
                                             ) : (
-                                                <Badge variant={selectedSale.status === 'APROVADO' ? 'success' : 'warning'} className="rounded-md px-2 py-0.5 font-bold uppercase tracking-wider border-none text-[9px]">
-                                                    {selectedSale.status}
-                                                </Badge>
+                                                <>
+                                                    <Badge variant={selectedSale.status === 'APROVADO' ? 'success' : 'warning'} className="rounded-md px-2 py-0.5 font-bold uppercase tracking-wider border-none text-[9px]">
+                                                        {selectedSale.status}
+                                                    </Badge>
+                                                    <p className="font-medium text-xs opacity-70 italic">{selectedSale.origem}</p>
+                                                </>
                                             )}
-                                            <p className="font-medium text-xs opacity-70 italic">{selectedSale.origem}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -527,7 +544,8 @@ export function SalesView() {
                                                             data: selectedSale.data,
                                                             status: selectedSale.status,
                                                             valor: selectedSale.valor,
-                                                            descricao: selectedSale.descricao
+                                                            descricao: selectedSale.descricao,
+                                                            origem: selectedSale.origem
                                                         });
                                                         toast.success("Venda atualizada com sucesso!");
                                                         setIsEditing(false);

@@ -265,7 +265,8 @@ export function ModoTV({ data, loading, lastSync }: ModoTVProps) {
                             className="flex-grow flex flex-col gap-12"
                         >
                             <div className="grid grid-cols-3 gap-12 flex-grow mb-12">
-                                <div className="bg-white/5 p-12 rounded-[4rem] border border-white/10 flex flex-col justify-between">
+                                {/* Settled OpEx */}
+                                <div className="bg-white/5 p-12 rounded-[4rem] border border-white/10 flex flex-col items-center justify-center text-center">
                                     <p className="text-2xl font-black text-white/40 uppercase tracking-[0.4em]">Settled OpEx</p>
                                     <h3 className="text-7xl font-black text-error">
                                         {formatCurrency(kpis?.despesas_total || 0)}
