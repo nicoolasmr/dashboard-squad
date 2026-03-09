@@ -302,11 +302,9 @@ export function FinanceView() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="ALL">Todos Status</SelectItem>
-                                    <SelectItem value="KIWIFY">Kiwify</SelectItem>
-                                    <SelectItem value="HOTMART">Hotmart</SelectItem>
-                                    <SelectItem value="STRIPE">Stripe</SelectItem>
-                                    <SelectItem value="ASAAS">Asaas</SelectItem>
-                                    <SelectItem value="MANUAL">Manual</SelectItem>
+                                    <SelectItem value="PAGO">Pago</SelectItem>
+                                    <SelectItem value="PREVISTO">Previsto</SelectItem>
+                                    <SelectItem value="ATRASADO">Atrasado</SelectItem>
                                 </SelectContent>
                             </Select>
 
