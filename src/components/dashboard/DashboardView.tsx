@@ -303,7 +303,10 @@ export function DashboardView({ data, loading, isTVMode, lastSync, onViewSales, 
                                     </div>
                                     <div>
                                         <p className="text-sm font-black text-foreground">{sale.nome}</p>
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70">{sale.produto}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70">{sale.produto}</p>
+                                            <span className="text-[9px] font-black text-primary/60 italic uppercase tracking-widest">• {sale.origem}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="text-right">

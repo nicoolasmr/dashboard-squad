@@ -99,6 +99,14 @@ export function FinanceView() {
             )
         },
         {
+            header: "Origem",
+            accessor: (item: Transaction) => (
+                <Badge variant="secondary" className="rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter">
+                    {item.origem}
+                </Badge>
+            )
+        },
+        {
             header: "", accessor: (item: Transaction) => (
                 <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-muted" onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
@@ -294,9 +302,11 @@ export function FinanceView() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="ALL">Todos Status</SelectItem>
-                                    <SelectItem value="PAGO">Pago</SelectItem>
-                                    <SelectItem value="PREVISTO">Previsto</SelectItem>
-                                    <SelectItem value="ATRASADO">Atrasado</SelectItem>
+                                    <SelectItem value="KIWIFY">Kiwify</SelectItem>
+                                    <SelectItem value="HOTMART">Hotmart</SelectItem>
+                                    <SelectItem value="STRIPE">Stripe</SelectItem>
+                                    <SelectItem value="ASAAS">Asaas</SelectItem>
+                                    <SelectItem value="MANUAL">Manual</SelectItem>
                                 </SelectContent>
                             </Select>
 
