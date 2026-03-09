@@ -37,11 +37,11 @@ export function SalesView() {
     const [selectedSale, setSelectedSale] = useState<Transaction | null>(null);
     const [search, setSearch] = useState("");
     const [saving, setSaving] = useState(false);
-    const { update } = useTransactions();
+    const { update, remove } = useTransactions();
 
     // Controlled form state
     const [form, setForm] = useState({
-        nome: "", email: "", produto: "", valor: "", origem: "MANUAL" as string, data: new Date().toISOString().slice(0, 10)
+        nome: "", email: "", produto: "", valor: "", origem: "MANUAL" as string, status: "APROVADO" as string, data: new Date().toISOString().slice(0, 10)
     });
 
     const columns: any[] = [
@@ -243,6 +243,8 @@ export function SalesView() {
                                 <SelectItem value="KIWIFY">Kiwify</SelectItem>
                                 <SelectItem value="HOTMART">Hotmart</SelectItem>
                                 <SelectItem value="STRIPE">Stripe</SelectItem>
+                                <SelectItem value="ASAAS">Asaas</SelectItem>
+                                <SelectItem value="MANUAL">Manual</SelectItem>
                             </SelectContent>
                         </Select>
 
@@ -329,6 +331,19 @@ export function SalesView() {
                             </Select>
                         </div>
                         <div className="space-y-2">
+                            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Status Inicial</Label>
+                            <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
+                                <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/40 font-bold">
+                                    <SelectValue placeholder="Selecione o status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="APROVADO">Aprovado</SelectItem>
+                                    <SelectItem value="PENDENTE">Pendente</SelectItem>
+                                    <SelectItem value="RECUSADO">Recusado</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
                             <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1">Data</Label>
                             <Input value={form.data} onChange={e => setForm(f => ({ ...f, data: e.target.value }))} type="date" className="h-12 rounded-xl bg-muted/30 border-border/40" />
                         </div>
@@ -354,7 +369,7 @@ export function SalesView() {
 
                                     await create({
                                         tipo: "RECEITA",
-                                        status: "PENDENTE",
+                                        status: form.status as any,
                                         data: form.data,
                                         valor: parsedValor,
                                         nome: form.nome,
@@ -367,7 +382,7 @@ export function SalesView() {
                                     });
                                     toast.success("Venda registrada com sucesso!");
                                     setIsNewSaleOpen(false);
-                                    setForm({ nome: "", email: "", produto: "", valor: "", origem: "MANUAL", data: new Date().toISOString().slice(0, 10) });
+                                    setForm({ nome: "", email: "", produto: "", valor: "", origem: "MANUAL", status: "APROVADO", data: new Date().toISOString().slice(0, 10) });
                                 } catch (e: any) {
                                     console.error("Save error:", e);
                                     // Show precise error message from Supabase or custom error
@@ -564,10 +579,30 @@ export function SalesView() {
                                         <>
                                             <Button
                                                 variant="outline"
-                                                className="flex-1 h-12 rounded-xl font-bold border-border/60"
+                                                className="h-12 rounded-xl font-bold border-border/60"
                                                 onClick={() => setIsEditing(true)}
                                             >
                                                 Editar Dados
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                className="h-12 w-12 rounded-xl p-0 flex items-center justify-center shadow-lg shadow-destructive/10"
+                                                disabled={saving}
+                                                onClick={async () => {
+                                                    if (!confirm("Tem certeza que deseja excluir esta venda?")) return;
+                                                    setSaving(true);
+                                                    try {
+                                                        await remove(selectedSale.id);
+                                                        toast.success("Venda excluída com sucesso!");
+                                                        setSelectedSale(null);
+                                                    } catch (e: any) {
+                                                        toast.error(`Erro ao excluir: ${e.message}`);
+                                                    } finally {
+                                                        setSaving(false);
+                                                    }
+                                                }}
+                                            >
+                                                <MoreHorizontal size={18} className="rotate-45" />
                                             </Button>
                                             <Button
                                                 className="flex-1 h-12 rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
