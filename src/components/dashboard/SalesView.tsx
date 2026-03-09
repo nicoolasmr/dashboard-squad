@@ -31,13 +31,12 @@ import { toast } from "sonner";
 
 export function SalesView() {
     const currentMes = new Date().toISOString().slice(0, 7);
-    const { data, loading, create } = useTransactions("RECEITA");
+    const { data, loading, create, update, remove } = useTransactions("RECEITA");
     const { goal } = useGoals(currentMes);
     const [isNewSaleOpen, setIsNewSaleOpen] = useState(false);
     const [selectedSale, setSelectedSale] = useState<Transaction | null>(null);
     const [search, setSearch] = useState("");
     const [saving, setSaving] = useState(false);
-    const { update, remove } = useTransactions();
 
     // Controlled form state
     const [form, setForm] = useState({
@@ -71,9 +70,15 @@ export function SalesView() {
                     'CANCELADO': 'destructive',
                     'REEMBOLSADO': 'outline'
                 };
+                const displayStatus: Record<string, string> = {
+                    'APROVADO': 'aprovado',
+                    'PENDENTE': 'pendente',
+                    'CANCELADO': 'recusado',
+                    'REEMBOLSADO': 'reembolsado'
+                };
                 return (
                     <Badge variant={variants[item.status] as any} className="rounded-lg px-2.5 py-0.5 font-bold border-none capitalize">
-                        {item.status.toLowerCase()}
+                        {displayStatus[item.status] || item.status.toLowerCase()}
                     </Badge>
                 );
             }
@@ -230,7 +235,7 @@ export function SalesView() {
                                 <SelectItem value="ALL">Todos Status</SelectItem>
                                 <SelectItem value="APROVADO">Aprovado</SelectItem>
                                 <SelectItem value="PENDENTE">Pendente</SelectItem>
-                                <SelectItem value="RECUSADO">Recusado</SelectItem>
+                                <SelectItem value="CANCELADO">Recusado</SelectItem>
                             </SelectContent>
                         </Select>
 
@@ -339,7 +344,7 @@ export function SalesView() {
                                 <SelectContent>
                                     <SelectItem value="APROVADO">Aprovado</SelectItem>
                                     <SelectItem value="PENDENTE">Pendente</SelectItem>
-                                    <SelectItem value="RECUSADO">Recusado</SelectItem>
+                                    <SelectItem value="CANCELADO">Recusado</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -493,7 +498,7 @@ export function SalesView() {
                                                         <SelectContent>
                                                             <SelectItem value="APROVADO">Aprovado</SelectItem>
                                                             <SelectItem value="PENDENTE">Pendente</SelectItem>
-                                                            <SelectItem value="CANCELADO">Cancelado</SelectItem>
+                                                            <SelectItem value="CANCELADO">Recusado</SelectItem>
                                                             <SelectItem value="REEMBOLSADO">Reembolsado</SelectItem>
                                                         </SelectContent>
                                                     </Select>

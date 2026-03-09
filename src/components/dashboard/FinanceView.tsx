@@ -123,6 +123,7 @@ export function FinanceView() {
 
     const [statusFilter, setStatusFilter] = useState<string>("ALL");
     const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+    const [originFilter, setOriginFilter] = useState<string>("ALL");
 
     const filteredData = currentData.filter(item => {
         const matchesSearch = (item.descricao?.toLowerCase() || "").includes(search.toLowerCase()) ||
@@ -131,8 +132,9 @@ export function FinanceView() {
 
         const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
         const matchesCategory = categoryFilter === "ALL" || item.categoria === categoryFilter;
+        const matchesOrigin = originFilter === "ALL" || item.origem === originFilter;
 
-        return matchesSearch && matchesStatus && matchesCategory;
+        return matchesSearch && matchesStatus && matchesCategory && matchesOrigin;
     });
 
     const [isEditing, setIsEditing] = useState(false);
@@ -321,12 +323,27 @@ export function FinanceView() {
                                 </SelectContent>
                             </Select>
 
+                            <Select value={originFilter} onValueChange={setOriginFilter}>
+                                <SelectTrigger className="h-12 w-[140px] rounded-xl border-border/60 bg-muted/20 font-bold text-[10px] uppercase tracking-wider">
+                                    <SelectValue placeholder="Origem" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">Todas Origens</SelectItem>
+                                    <SelectItem value="KIWIFY">Kiwify</SelectItem>
+                                    <SelectItem value="HOTMART">Hotmart</SelectItem>
+                                    <SelectItem value="STRIPE">Stripe</SelectItem>
+                                    <SelectItem value="ASAAS">Asaas</SelectItem>
+                                    <SelectItem value="MANUAL">Manual</SelectItem>
+                                </SelectContent>
+                            </Select>
+
                             <Button
                                 variant="outline"
                                 className="h-12 px-5 rounded-xl border-border/60 hover:bg-muted font-bold text-xs"
                                 onClick={() => {
                                     setStatusFilter("ALL");
                                     setCategoryFilter("ALL");
+                                    setOriginFilter("ALL");
                                     setSearch("");
                                     toast.success("Filtros limpos!");
                                 }}
